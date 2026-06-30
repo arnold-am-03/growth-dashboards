@@ -1,0 +1,20 @@
+<div class="block evolucion">
+  <div class="evol-head">
+    <h3>Evolución mensual</h3>
+    <span class="evol-range">{{ evol.rango }}</span>
+  </div>
+  <p class="desc">Casos agrupados por período de cierre.</p>
+
+  <div class="chart-title">Volumen desembolsado por mes <span>(miles de soles)</span></div>
+  <div class="chart">{{ evol.vol_chart | safe }}</div>
+
+  <div class="sparks">
+    {% for s in evol.sparks %}
+    <div class="spark-card">
+      <div class="spark-label">{{ s.label }}</div>
+      <div class="spark">{{ s.svg | safe }}</div>
+      <div class="spark-range">{{ s.rango }}</div>
+    </div>
+    {% endfor %}
+  </div>
+</div>

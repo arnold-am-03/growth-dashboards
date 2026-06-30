@@ -88,11 +88,29 @@ Commit + push y aparece solo en el mosaico. No se edita `app.py`.
 - `templates/<vista>.html`: extiende `dashboard_base.html` y rellena
   `{% block view %}`.
 
+## Gráficos
+
+`core/charts.py` genera gráficos SVG en el servidor (barras y sparklines), sin
+librerías de cliente. Se estilizan con las variables CSS del sitio y se animan
+por CSS. Cualquier proyecto puede importarlos:
+
+```python
+from core.charts import bar_chart, sparkline
+```
+
+El partial `templates/_evolucion.html` arma la sección de evolución mensual a
+partir de un dict `evol` (rango, gráfico de volumen y sparklines por métrica),
+y se incluye desde las vistas con `{% include "_evolucion.html" %}`.
+
 ## Sobre el experimento LTV
 
 - **Proyección** (Data_2025): impacto esperado de ampliar topes de LTV, calculado
   sobre el histórico. Métrica destacada: desembolso adicional anual estimado.
+  Conteo de casos: 87 elegibles = 84 cerrados + 3 sin contrato (idéntico a las
+  celdas "Cantidad de Casos" de la notebook). Se muestran dos tickets: de casos
+  con contrato cerrado y del segmento general.
 - **Seguimiento** (Data_2026): impacto real desde el 27-mar-2026, con comparación
   esperado vs. real en conversión, ticket y días de cierre.
+- Ambas vistas incluyen la **evolución mensual** agrupada por `Periodo de Cierre`.
 
 La lógica de `processor.py` replica la notebook `Puesta_en_Marcha_LTV.ipynb`.
