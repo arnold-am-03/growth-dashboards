@@ -1,7 +1,7 @@
 {
   "slug": "puesta_en_marcha_ltv",
   "title": "Aumento de LTV para segmento de buenos pagadores",
-  "tags": ["Ingresos"],
+  "tags": ["Ingresos","Clientes Nuevos"],
   "order": 1,
   "views": [
     { "slug": "proyeccion", "label": "Proyección" },
