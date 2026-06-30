@@ -69,6 +69,53 @@ a { color: inherit; text-decoration: none; }
 }
 .site-head nav {
   font-size: 13px; font-weight: 700; letter-spacing: 0.04em; color: var(--muted);
+  display: flex; align-items: center; gap: 16px;
+}
+.site-head nav .logout {
+  color: var(--accent-ink); border: 1px solid var(--accent-edge);
+  background: var(--accent-soft); padding: 5px 12px; border-radius: 999px;
+  font-size: 12.5px; transition: background 0.2s var(--ease);
+}
+.site-head nav .logout:hover { background: #d8e6e2; }
+
+/* ===== Login ========================================================== */
+
+.login-body {
+  min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  padding: 24px;
+}
+.login-wrap { width: 100%; max-width: 420px; }
+.login-card {
+  background: var(--bone); border: 1px solid var(--line);
+  border-radius: var(--r); padding: 38px 34px 30px;
+  box-shadow: 0 24px 60px -34px rgba(42, 41, 37, 0.5);
+}
+.login-brand { display: flex; align-items: center; gap: 12px; margin-bottom: 30px; }
+.login-brand .brand-mark { width: 18px; height: 18px; border-radius: 5px; }
+.login-title {
+  font-weight: 900; font-size: 26px; letter-spacing: -0.02em; margin: 0 0 6px;
+}
+.login-sub { color: var(--muted); font-size: 14.5px; margin: 0 0 24px; }
+.login-label {
+  display: block; font-size: 12px; font-weight: 700; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--faint); margin-bottom: 8px;
+}
+.login-input { max-width: none; }
+.login-btn {
+  width: 100%; margin-top: 18px; padding: 13px 16px;
+  font: 900 15px "Lato", sans-serif; color: #fff; background: var(--accent);
+  border: 1px solid var(--accent); border-radius: 10px; cursor: pointer;
+  transition: background 0.2s var(--ease), transform 0.2s var(--ease);
+}
+.login-btn:hover { background: var(--accent-ink); }
+.login-btn:active { transform: translateY(1px); }
+.login-error {
+  background: var(--clay-soft); border: 1px solid var(--clay-edge);
+  color: var(--clay); font-weight: 700; font-size: 13.5px;
+  padding: 11px 14px; border-radius: 10px; margin-bottom: 18px;
+}
+.login-foot {
+  margin: 26px 0 0; text-align: center; font-size: 12px; color: var(--faint);
 }
 
 /* ===== Portada ======================================================== */

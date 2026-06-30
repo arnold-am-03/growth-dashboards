@@ -9,3 +9,10 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: 3.12.8
+      # Clave para firmar las sesiones. Generar un valor largo y aleatorio.
+      # Definir en el dashboard de Render (no se versiona).
+      - key: SECRET_KEY
+        sync: false
+      # Hash de la contraseña del equipo (python scripts/gen_password_hash.py).
+      - key: APP_PASSWORD_HASH
+        sync: false

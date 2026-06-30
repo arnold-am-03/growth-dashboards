@@ -114,3 +114,22 @@ y se incluye desde las vistas con `{% include "_evolucion.html" %}`.
 - Ambas vistas incluyen la **evolución mensual** agrupada por `Periodo de Cierre`.
 
 La lógica de `processor.py` replica la notebook `Puesta_en_Marcha_LTV.ipynb`.
+
+## Acceso / seguridad
+
+Toda la plataforma está detrás de un inicio de sesión por contraseña de equipo.
+La clave **no** vive en el código ni se envía al navegador: se lee de variables
+de entorno del servidor y la sesión se guarda en una cookie firmada (HttpOnly y
+Secure en producción).
+
+Variables de entorno a definir en Render (Environment):
+
+- `SECRET_KEY` — cadena larga y aleatoria para firmar las sesiones.
+  Generar con: `python -c "import os;print(os.urandom(32).hex())"`
+- `APP_PASSWORD_HASH` — hash de la contraseña del equipo.
+  Generar con: `python scripts/gen_password_hash.py` (no guarda nada en texto plano).
+
+Alternativa simple para desarrollo local: `APP_PASSWORD` con la clave en texto
+plano (solo local; en producción usar el hash). Ver `.env.example`.
+
+Cerrar sesión: botón "Salir" en la cabecera (`/logout`).

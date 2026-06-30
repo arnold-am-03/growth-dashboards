@@ -11,6 +11,7 @@ import os
 from flask import Flask, abort, redirect, render_template, request, url_for
 from jinja2 import ChoiceLoader, FileSystemLoader
 
+from core.auth import init_auth
 from core.registry import (
     BASE_DIR,
     PROJECTS_DIR,
@@ -34,6 +35,9 @@ app.jinja_loader = ChoiceLoader(
         FileSystemLoader(str(PROJECTS_DIR)),
     ]
 )
+
+# Protege toda la plataforma detrás de un inicio de sesión.
+init_auth(app)
 
 # --- Registro y caché --------------------------------------------------
 
