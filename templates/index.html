@@ -1,23 +1,32 @@
 {% extends "base.html" %}
-{% block title %}Experimentos · Growth Dashboards{% endblock %}
+{% block title %}Experimentos · Growth Innovation{% endblock %}
 
 {% block body %}
 <section class="intro">
   <div class="wrap">
     <span class="eyebrow">Experimentos</span>
     <h1>Cada propuesta, su impacto esperado y el real.</h1>
-    <p>Selecciona un experimento para ver su proyección y su seguimiento.</p>
   </div>
+</section>
+
+<section class="wrap controls">
+  <input id="buscador" class="search" type="search" placeholder="Buscar experimento por nombre…" autocomplete="off">
+  {% if kpis %}
+  <div class="chips" role="group" aria-label="Filtrar por KPI">
+    {% for k in kpis %}
+    <button type="button" class="chip" data-tag="{{ k }}">{{ k }}</button>
+    {% endfor %}
+  </div>
+  {% endif %}
 </section>
 
 <section class="wrap">
   <div class="mosaic">
     {% for p in projects %}
-    <a class="tile" href="{{ url_for('project_home', slug=p.slug) }}">
-      {% if p.tag %}<span class="tile-tag">{{ p.tag }}</span>{% endif %}
+    <a class="tile" href="{{ url_for('project_home', slug=p.slug) }}"
+       data-title="{{ p.title }}" data-tags="{{ p.tags | join('|') }}">
+      {% if p.tags %}<span class="tile-tag">{{ p.tags | join(' · ') }}</span>{% endif %}
       <h2>{{ p.title }}</h2>
-      {% if p.subtitle %}<span class="tile-sub">{{ p.subtitle }}</span>{% endif %}
-      {% if p.description %}<p>{{ p.description }}</p>{% endif %}
       <div class="tile-foot">
         <span class="views">
           {% for v in p.views %}<span>{{ v.label }}</span>{% endfor %}
@@ -27,5 +36,8 @@
     </a>
     {% endfor %}
   </div>
+  <p id="sin-resultados" class="no-results">Ningún experimento coincide con la búsqueda.</p>
 </section>
+
+<script defer src="{{ url_for('static', filename='js/index.js') }}"></script>
 {% endblock %}

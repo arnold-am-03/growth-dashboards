@@ -5,8 +5,8 @@
 <section class="proj-head">
   <div class="wrap">
     <a class="back" href="{{ url_for('index') }}">&larr; Experimentos</a>
+    {% if project.tags %}<span class="proj-tag">{{ project.tags | join(' · ') }}</span>{% endif %}
     <h1>{{ project.title }}</h1>
-    {% if project.subtitle %}<p class="sub">{{ project.subtitle }}</p>{% endif %}
     <div class="tabs">
       {% for v in views %}
       <a href="{{ url_for('project_view', slug=project.slug, view=v.slug) }}"

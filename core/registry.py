@@ -60,6 +60,10 @@ class Project:
         return self.meta.get("tag", "")
 
     @property
+    def tags(self) -> list[str]:
+        return self.meta.get("tags", [])
+
+    @property
     def order(self) -> int:
         return int(self.meta.get("order", 999))
 

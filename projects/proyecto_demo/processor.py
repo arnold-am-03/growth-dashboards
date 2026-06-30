@@ -25,7 +25,7 @@ import pandas as pd
 
 # permitir importar core.charts tanto en local como en Render
 sys.path.append(str(Path(__file__).resolve().parents[2]))
-from core.charts import bar_chart, sparkline  # noqa: E402
+from core.charts import bar_chart, increment_bars, line_chart  # noqa: E402
 
 warnings.filterwarnings("ignore")
 
@@ -164,28 +164,30 @@ def _bloque_evolucion(rows):
         {"label": labels[i], "value": r["vol"], "caption": f"{r['n']} casos"}
         for i, r in enumerate(rows)
     ]
-
-    def rango_txt(vals, fmt):
-        vv = [v for v in vals
-              if v is not None and not (isinstance(v, float) and np.isnan(v))]
-        if not vv:
-            return "-"
-        return f"mín {fmt(min(vv))} · máx {fmt(max(vv))}"
-
     conv_v = [r["conv"] for r in rows]
     tick_v = [r["ticket"] for r in rows]
     dias_v = [r["dias"] for r in rows]
 
     return {
         "rango": rango,
-        "vol_chart": bar_chart(vol_points, value_fmt=lambda v: f"{v / 1000:,.0f}k"),
-        "sparks": [
-            {"label": "Conversión", "svg": sparkline(conv_v),
-             "rango": rango_txt(conv_v, lambda v: pct(v, 0))},
-            {"label": "Ticket promedio", "svg": sparkline(tick_v),
-             "rango": rango_txt(tick_v, lambda v: f"S/{v/1000:,.0f}k")},
-            {"label": "Días de cierre", "svg": sparkline(dias_v),
-             "rango": rango_txt(dias_v, lambda v: num(v, 0))},
+        "vol_chart": bar_chart(
+            vol_points,
+            y_fmt=lambda v: f"{v / 1e6:.1f}M",
+            tip_fmt=lambda v: soles(v),
+        ),
+        "series": [
+            {"label": "Conversión",
+             "svg": line_chart(labels, conv_v,
+                               y_fmt=lambda v: pct(v, 0),
+                               tip_fmt=lambda v: pct(v, 1))},
+            {"label": "Ticket promedio",
+             "svg": line_chart(labels, tick_v,
+                               y_fmt=lambda v: f"S/{v / 1000:,.0f}k",
+                               tip_fmt=lambda v: soles(v))},
+            {"label": "Días de cierre",
+             "svg": line_chart(labels, dias_v,
+                               y_fmt=lambda v: f"{v:.0f}",
+                               tip_fmt=lambda v: f"{num(v, 1)} días")},
         ],
     }
 
@@ -233,6 +235,8 @@ def _proyeccion():
             "dias": num(dias),
         },
         "bar_pct": round(vol_hist / vol_pot * 100, 1) if vol_pot else 0,
+        "inc_chart": increment_bars(vol_hist, vol_pot, fmt=lambda v: soles(v)),
+        "uplift": pct((vol_pot - vol_hist) / vol_hist) if vol_hist else "-",
         "evol": _bloque_evolucion(_serie_por_periodo(casos)),
         "_raw": {"conv": conv, "ticket": ticket_cerr, "dias": dias},
     }

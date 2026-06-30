@@ -12,6 +12,7 @@ from flask import Flask, abort, redirect, render_template, request, url_for
 from jinja2 import ChoiceLoader, FileSystemLoader
 
 from core.registry import (
+    BASE_DIR,
     PROJECTS_DIR,
     STATIC_DIR,
     TEMPLATES_DIR,
@@ -59,7 +60,12 @@ def get_project_data(project, refresh=False):
 @app.route("/")
 def index():
     projects = sorted(get_registry().values(), key=lambda p: (p.order, p.title))
-    return render_template("index.html", projects=projects)
+    kpis = []
+    tags_path = BASE_DIR / "tags.json"
+    if tags_path.exists():
+        import json
+        kpis = json.loads(tags_path.read_text(encoding="utf-8")).get("kpis", [])
+    return render_template("index.html", projects=projects, kpis=kpis)
 
 
 @app.route("/p/<slug>")

@@ -1,122 +1,212 @@
 """
-Gráficos SVG generados en el servidor. Sin librerías de cliente: cada
-gráfico es SVG inline, se estiliza con las variables CSS del sitio y se
-anima por CSS. Reutilizable por cualquier proyecto.
+Graficos SVG generados en el servidor. Sin librerias de cliente.
 
-    from core.charts import bar_chart, sparkline
-    svg = bar_chart([{"label": "Ene", "value": 805685, "caption": "6 casos"}, ...])
+  - bar_chart     : barras verticales con eje Y (escala), eje X (meses),
+                    caption opcional bajo cada barra y tooltip reactivo.
+  - line_chart    : linea de tendencia con eje Y (escala), eje X (meses) y
+                    puntos que aparecen con tooltip al pasar el mouse.
+  - increment_bars: comparacion Historico vs Potencial resaltando el
+                    incremento (cap de color acento sobre el potencial).
+
+Los colores salen de variables CSS del sitio; la interactividad la maneja
+static/js/charts.js leyendo el atributo data-tip.
 """
 
 from __future__ import annotations
 
+import math
 from html import escape
 
+W = 760
+PAD_L = 52   # espacio para etiquetas del eje Y
+PAD_R = 14
+PAD_T = 18
+NICE = (1, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10)
 
-def _round(x, n=1):
-    return round(float(x), n)
+
+def _nice_ceil(x):
+    if x <= 0:
+        return 1.0
+    exp = math.floor(math.log10(x))
+    base = 10 ** exp
+    f = x / base
+    for m in NICE:
+        if f <= m + 1e-9:
+            return m * base
+    return 10 * base
 
 
-def bar_chart(points, *, value_fmt=None, unit="", height=210):
-    """Barras verticales con etiqueta de valor arriba y rótulo abajo.
+def _ticks(vmax, n=4):
+    top = _nice_ceil(vmax)
+    return [top * i / n for i in range(n + 1)], top
 
-    points: lista de dicts {label, value, caption?}.
-    value_fmt: función valor -> texto para la etiqueta superior.
-    """
+
+def _grid_and_yaxis(parts, top, ticks, plot_top, plot_bot, y_fmt,
+                    w=W, pad_l=PAD_L, pad_r=PAD_R):
+    span = plot_bot - plot_top
+    for t in ticks:
+        y = plot_bot - (t / top) * span if top else plot_bot
+        parts.append(
+            f'<line class="grid" x1="{pad_l}" y1="{y:.1f}" '
+            f'x2="{w - pad_r}" y2="{y:.1f}"/>'
+        )
+        parts.append(
+            f'<text class="axis-lab" x="{pad_l - 8}" y="{y + 4:.1f}" '
+            f'text-anchor="end">{escape(y_fmt(t))}</text>'
+        )
+
+
+def bar_chart(points, *, y_fmt, tip_fmt=None, height=250):
     if not points:
         return ""
-    if value_fmt is None:
-        value_fmt = lambda v: f"{v:,.0f}"
-
-    W = 760
+    tip_fmt = tip_fmt or y_fmt
     H = height
-    pad_l, pad_r, pad_top, pad_bot = 8, 8, 34, 38
-    plot_h = H - pad_top - pad_bot
+    pad_bot = 46
+    plot_top, plot_bot = PAD_T, H - pad_bot
+    span = plot_bot - plot_top
     n = len(points)
-    slot = (W - pad_l - pad_r) / n
-    bar_w = min(slot * 0.46, 64)
+    slot = (W - PAD_L - PAD_R) / n
+    bar_w = min(slot * 0.5, 56)
 
     vals = [max(0.0, float(p["value"])) for p in points]
-    vmax = max(vals) or 1.0
-    baseline_y = pad_top + plot_h
+    ticks, top = _ticks(max(vals) or 1)
 
-    parts = [
-        f'<svg class="svg-bars" viewBox="0 0 {W} {H}" '
-        f'width="100%" preserveAspectRatio="xMidYMid meet" role="img">'
-    ]
-    # baseline
-    parts.append(
-        f'<line x1="{pad_l}" y1="{baseline_y:.1f}" x2="{W - pad_r}" '
-        f'y2="{baseline_y:.1f}" stroke="var(--line)" stroke-width="1"/>'
-    )
+    parts = [f'<svg class="svg-chart" viewBox="0 0 {W} {H}" width="100%" '
+             f'preserveAspectRatio="xMidYMid meet" role="img">']
+    _grid_and_yaxis(parts, top, ticks, plot_top, plot_bot, y_fmt)
 
     for i, p in enumerate(points):
         v = vals[i]
-        bh = (v / vmax) * plot_h
-        cx = pad_l + i * slot + slot / 2
+        bh = (v / top) * span if top else 0
+        cx = PAD_L + i * slot + slot / 2
         x = cx - bar_w / 2
-        y = baseline_y - bh
-        delay = f"{i * 0.05:.2f}s"
-
+        y = plot_bot - bh
+        tip = f'{p["label"]} · {tip_fmt(v)}'
         parts.append(
             f'<rect class="bar" x="{x:.1f}" y="{y:.1f}" width="{bar_w:.1f}" '
-            f'height="{bh:.1f}" rx="4" fill="var(--ink)" '
-            f'style="animation-delay:{delay}">'
-            f'<title>{escape(str(p["label"]))}: {escape(value_fmt(v))}</title></rect>'
+            f'height="{bh:.1f}" rx="4" data-tip="{escape(tip)}" '
+            f'style="animation-delay:{i * 0.05:.2f}s"/>'
         )
-        # valor arriba
         parts.append(
-            f'<text x="{cx:.1f}" y="{y - 9:.1f}" text-anchor="middle" '
-            f'class="bar-val">{escape(value_fmt(v))}</text>'
+            f'<text class="x-lab" x="{cx:.1f}" y="{H - 26:.1f}" '
+            f'text-anchor="middle">{escape(str(p["label"]))}</text>'
         )
-        # rótulo mes
-        parts.append(
-            f'<text x="{cx:.1f}" y="{H - 20:.1f}" text-anchor="middle" '
-            f'class="bar-lab">{escape(str(p["label"]))}</text>'
-        )
-        # caption opcional
         if p.get("caption"):
             parts.append(
-                f'<text x="{cx:.1f}" y="{H - 6:.1f}" text-anchor="middle" '
-                f'class="bar-cap">{escape(str(p["caption"]))}</text>'
+                f'<text class="x-cap" x="{cx:.1f}" y="{H - 11:.1f}" '
+                f'text-anchor="middle">{escape(str(p["caption"]))}</text>'
             )
 
     parts.append("</svg>")
     return "".join(parts)
 
 
-def sparkline(values, *, width=240, height=56):
-    """Línea de tendencia compacta con área y punto final."""
-    vals = [float(v) for v in values if v is not None]
-    if len(vals) < 2:
+def line_chart(labels, values, *, y_fmt, tip_fmt=None, height=150):
+    """Linea compacta para small-multiples. Usa un viewBox angosto (~360)
+    para que el texto de los ejes sea legible casi a escala 1:1."""
+    pts = [(labels[i], float(v)) for i, v in enumerate(values) if v is not None]
+    if len(pts) < 2:
         return ""
+    tip_fmt = tip_fmt or y_fmt
 
-    pad = 6
-    W, H = width, height
-    vmin, vmax = min(vals), max(vals)
-    span = (vmax - vmin) or 1.0
-    step = (W - 2 * pad) / (len(vals) - 1)
+    w, pad_l, pad_r = 360, 40, 12
+    H = height
+    pad_bot = 28
+    plot_top, plot_bot = 14, H - pad_bot
+    span = plot_bot - plot_top
+    vals = [v for _, v in pts]
+    ticks, top = _ticks(max(vals) or 1, n=3)
+
+    n = len(pts)
+    plot_w = w - pad_l - pad_r
+    every = 1 if n <= 8 else 2
 
     def xy(i, v):
-        x = pad + i * step
-        y = pad + (1 - (v - vmin) / span) * (H - 2 * pad)
+        x = pad_l + (i * plot_w / (n - 1))
+        y = plot_bot - (v / top) * span if top else plot_bot
         return x, y
 
-    pts = [xy(i, v) for i, v in enumerate(vals)]
-    line = " ".join(f"{x:.1f},{y:.1f}" for x, y in pts)
-    area = (
-        f"{pad:.1f},{H - pad:.1f} "
-        + line
-        + f" {pts[-1][0]:.1f},{H - pad:.1f}"
-    )
-    ex, ey = pts[-1]
+    coords = [xy(i, v) for i, (_, v) in enumerate(pts)]
 
-    return (
-        f'<svg class="svg-spark" viewBox="0 0 {W} {H}" width="100%" '
-        f'preserveAspectRatio="none" role="img">'
-        f'<polygon class="spark-area" points="{area}" fill="var(--ink)" opacity="0.06"/>'
-        f'<polyline class="spark-line" points="{line}" fill="none" '
-        f'stroke="var(--ink)" stroke-width="2" stroke-linecap="round" '
-        f'stroke-linejoin="round"/>'
-        f'<circle cx="{ex:.1f}" cy="{ey:.1f}" r="3.2" fill="var(--ink)"/>'
-        f"</svg>"
-    )
+    parts = [f'<svg class="svg-chart" viewBox="0 0 {w} {H}" width="100%" '
+             f'preserveAspectRatio="xMidYMid meet" role="img">']
+    _grid_and_yaxis(parts, top, ticks, plot_top, plot_bot, y_fmt,
+                    w=w, pad_l=pad_l, pad_r=pad_r)
+
+    line = " ".join(f"{x:.1f},{y:.1f}" for x, y in coords)
+    parts.append(f'<polyline class="ln-line" points="{line}"/>')
+
+    for i, (lab, v) in enumerate(pts):
+        x, y = coords[i]
+        tip = f'{lab} · {tip_fmt(v)}'
+        parts.append(
+            f'<g class="ln-pt" data-tip="{escape(tip)}">'
+            f'<circle class="hit" cx="{x:.1f}" cy="{y:.1f}" r="14"/>'
+            f'<circle class="dot" cx="{x:.1f}" cy="{y:.1f}" r="4"/></g>'
+        )
+        if i % every == 0 or i == n - 1:
+            parts.append(
+                f'<text class="x-lab sm" x="{x:.1f}" y="{H - 9:.1f}" '
+                f'text-anchor="middle">{escape(str(lab))}</text>'
+            )
+
+    parts.append("</svg>")
+    return "".join(parts)
+
+
+def increment_bars(hist, pot, *, fmt, height=230):
+    """Historico vs Potencial. El potencial lleva un cap de color acento
+    igual al incremento, para que la diferencia se note pese a ser pequena."""
+    H = height
+    pad_bot = 34
+    plot_top, plot_bot = PAD_T, H - pad_bot
+    span = plot_bot - plot_top
+    ticks, top = _ticks(max(hist, pot) or 1)
+
+    cats = [("Histórico", hist, False), ("Potencial", pot, True)]
+    n = len(cats)
+    slot = (W - PAD_L - PAD_R) / n
+    bar_w = min(slot * 0.32, 120)
+
+    parts = [f'<svg class="svg-chart" viewBox="0 0 {W} {H}" width="100%" '
+             f'preserveAspectRatio="xMidYMid meet" role="img">']
+    _grid_and_yaxis(parts, top, ticks,
+                    plot_top, plot_bot, lambda v: f"{v/1e6:.1f}M")
+
+    for i, (lab, val, split) in enumerate(cats):
+        cx = PAD_L + i * slot + slot / 2
+        x = cx - bar_w / 2
+        if not split:
+            bh = (val / top) * span
+            parts.append(
+                f'<rect class="bar" x="{x:.1f}" y="{plot_bot - bh:.1f}" '
+                f'width="{bar_w:.1f}" height="{bh:.1f}" rx="4" '
+                f'data-tip="{escape(lab + " · " + fmt(val))}"/>'
+            )
+        else:
+            base_h = (hist / top) * span
+            inc_h = ((pot - hist) / top) * span
+            y_base = plot_bot - base_h
+            y_inc = y_base - inc_h
+            parts.append(
+                f'<rect class="bar" x="{x:.1f}" y="{y_base:.1f}" '
+                f'width="{bar_w:.1f}" height="{base_h:.1f}" rx="0" '
+                f'data-tip="{escape("Histórico · " + fmt(hist))}"/>'
+            )
+            parts.append(
+                f'<rect class="bar cap" x="{x:.1f}" y="{y_inc:.1f}" '
+                f'width="{bar_w:.1f}" height="{max(inc_h,3):.1f}" rx="4" '
+                f'data-tip="{escape("Adicional · " + fmt(pot - hist))}"/>'
+            )
+            # guia punteada que marca el nivel del historico
+            parts.append(
+                f'<line class="lead" x1="{PAD_L}" y1="{y_base:.1f}" '
+                f'x2="{x + bar_w:.1f}" y2="{y_base:.1f}"/>'
+            )
+        parts.append(
+            f'<text class="x-lab" x="{cx:.1f}" y="{H - 12:.1f}" '
+            f'text-anchor="middle">{escape(lab)}</text>'
+        )
+
+    parts.append("</svg>")
+    return "".join(parts)
