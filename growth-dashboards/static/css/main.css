@@ -1,0 +1,464 @@
+/* ======================================================================
+   Growth Dashboards — estilo base
+   Paleta: crema · blanco hueso · gris oscuro     Tipografía: Lato
+   ====================================================================== */
+
+:root {
+  --cream:  #ECE5D6;   /* crema  — fondo */
+  --bone:   #FAF7F0;   /* hueso  — superficies */
+  --card:   #FFFFFF;   /* tarjeta */
+  --ink:    #2A2925;   /* gris oscuro — texto */
+  --muted:  #76705F;   /* gris medio — texto secundario */
+  --faint:  #A39C8B;   /* gris claro — etiquetas */
+  --line:   #DDD6C6;   /* hairline */
+  --line-2: #CFC7B4;
+
+  /* color funcional, solo para deltas */
+  --up:   #5E6B4F;     /* salvia */
+  --down: #9A5B4A;     /* arcilla */
+
+  --r:    14px;        /* radio */
+  --r-sm: 10px;
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --maxw: 1180px;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  font-family: "Lato", -apple-system, system-ui, sans-serif;
+  font-weight: 400;
+  color: var(--ink);
+  background: var(--cream);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+a { color: inherit; text-decoration: none; }
+
+.wrap {
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: 0 32px;
+}
+
+.eyebrow {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+
+/* ======================================================================
+   Encabezado del sitio
+   ====================================================================== */
+
+.site-head {
+  border-bottom: 1px solid var(--line);
+}
+.site-head .wrap {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 24px;
+  padding-top: 28px;
+  padding-bottom: 28px;
+}
+.brand {
+  font-weight: 900;
+  font-size: 19px;
+  letter-spacing: -0.02em;
+}
+.brand .dot { color: var(--faint); }
+.site-head nav {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+/* ======================================================================
+   Portada — mosaico de experimentos
+   ====================================================================== */
+
+.intro {
+  padding: 64px 0 40px;
+}
+.intro h1 {
+  font-weight: 900;
+  font-size: clamp(34px, 5vw, 56px);
+  line-height: 1.04;
+  letter-spacing: -0.03em;
+  margin: 14px 0 0;
+  max-width: 16ch;
+}
+.intro p {
+  color: var(--muted);
+  font-size: 17px;
+  max-width: 52ch;
+  margin: 18px 0 0;
+}
+
+.mosaic {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 22px;
+  padding-bottom: 80px;
+}
+
+.tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 230px;
+  padding: 26px 26px 22px;
+  background: var(--bone);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  overflow: hidden;
+  transition:
+    transform 0.4s var(--ease),
+    box-shadow 0.4s var(--ease),
+    border-color 0.4s var(--ease),
+    background 0.4s var(--ease);
+}
+/* filete superior que se revela en hover */
+.tile::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--ink);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.45s var(--ease);
+}
+.tile:hover {
+  transform: translateY(-6px);
+  background: var(--card);
+  border-color: var(--line-2);
+  box-shadow: 0 18px 40px -22px rgba(42, 41, 37, 0.45);
+}
+.tile:hover::before { transform: scaleX(1); }
+
+.tile .tile-tag {
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.tile h2 {
+  font-weight: 900;
+  font-size: 23px;
+  letter-spacing: -0.02em;
+  margin: 14px 0 4px;
+}
+.tile .tile-sub {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--muted);
+}
+.tile p {
+  font-size: 14px;
+  color: var(--muted);
+  margin: 12px 0 0;
+}
+.tile .tile-foot {
+  margin-top: auto;
+  padding-top: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--muted);
+}
+.tile .views {
+  display: flex;
+  gap: 8px;
+}
+.tile .views span {
+  padding: 3px 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  background: var(--cream);
+}
+.tile .arrow {
+  font-size: 18px;
+  color: var(--ink);
+  transition: transform 0.4s var(--ease);
+}
+.tile:hover .arrow { transform: translateX(6px); }
+
+/* ======================================================================
+   Dashboard de proyecto
+   ====================================================================== */
+
+.proj-head {
+  border-bottom: 1px solid var(--line);
+  padding: 40px 0 0;
+}
+.proj-head .back {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--muted);
+  transition: color 0.25s var(--ease);
+}
+.proj-head .back:hover { color: var(--ink); }
+.proj-head h1 {
+  font-weight: 900;
+  font-size: clamp(28px, 4vw, 42px);
+  letter-spacing: -0.03em;
+  margin: 18px 0 2px;
+}
+.proj-head .sub {
+  color: var(--muted);
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0 0 26px;
+}
+
+.tabs {
+  display: flex;
+  gap: 4px;
+}
+.tabs a {
+  position: relative;
+  padding: 12px 4px;
+  margin-right: 26px;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+  transition: color 0.25s var(--ease);
+}
+.tabs a::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: -1px;
+  height: 2px;
+  background: var(--ink);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s var(--ease);
+}
+.tabs a:hover { color: var(--ink); }
+.tabs a.active { color: var(--ink); }
+.tabs a.active::after { transform: scaleX(1); }
+
+.view {
+  padding: 44px 0 90px;
+}
+.view-note {
+  display: inline-block;
+  margin-bottom: 30px;
+  padding: 6px 14px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--bone);
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+}
+
+/* Héroe: número grande */
+.hero {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 14px 40px;
+  padding-bottom: 40px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 40px;
+}
+.hero .figure {
+  font-weight: 900;
+  font-size: clamp(48px, 8vw, 86px);
+  line-height: 0.92;
+  letter-spacing: -0.04em;
+}
+.hero .figure small {
+  font-size: 0.42em;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--muted);
+}
+.hero .figure-label {
+  max-width: 30ch;
+  color: var(--muted);
+  font-size: 15px;
+  padding-bottom: 8px;
+}
+.hero .figure-label strong { color: var(--ink); font-weight: 900; }
+
+/* Tarjetas de métricas */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+}
+.metric {
+  padding: 22px 22px 20px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+}
+.metric .k {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.metric .v {
+  font-weight: 900;
+  font-size: 32px;
+  letter-spacing: -0.03em;
+  margin-top: 8px;
+}
+.metric .note {
+  font-size: 13px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+/* Bloque de barra comparativa */
+.block {
+  margin-top: 40px;
+  padding: 30px;
+  background: var(--bone);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+}
+.block h3 {
+  font-weight: 900;
+  font-size: 17px;
+  letter-spacing: -0.01em;
+  margin: 0 0 4px;
+}
+.block .desc {
+  font-size: 14px;
+  color: var(--muted);
+  margin: 0 0 22px;
+}
+
+.bar-row { margin-top: 18px; }
+.bar-row:first-of-type { margin-top: 0; }
+.bar-row .bar-head {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 7px;
+}
+.bar-row .bar-head .muted { color: var(--muted); }
+.track {
+  height: 12px;
+  background: var(--cream);
+  border-radius: 999px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+}
+.track .fill {
+  height: 100%;
+  background: var(--ink);
+  border-radius: 999px;
+  transition: width 0.9s var(--ease);
+}
+.track.ghost .fill { background: var(--line-2); }
+
+/* Comparación esperado vs real */
+.compare {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0;
+}
+.cmp-row {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr auto;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 0;
+  border-top: 1px solid var(--line);
+}
+.cmp-row:first-child { border-top: none; }
+.cmp-row .cmp-label { font-weight: 700; font-size: 15px; }
+.cmp-row .cmp-val { text-align: right; }
+.cmp-row .cmp-val .tag {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--faint);
+  margin-bottom: 2px;
+}
+.cmp-row .cmp-val .n {
+  font-weight: 900;
+  font-size: 19px;
+  letter-spacing: -0.02em;
+}
+.cmp-row .cmp-val.expected .n { color: var(--muted); }
+.delta {
+  justify-self: end;
+  min-width: 78px;
+  text-align: center;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: -0.01em;
+  background: var(--cream);
+  border: 1px solid var(--line);
+}
+.delta.up   { color: var(--up);   border-color: #C7CDB9; background: #EEF0E7; }
+.delta.down { color: var(--down); border-color: #E0C8BF; background: #F4E9E4; }
+.delta.flat { color: var(--muted); }
+
+/* ======================================================================
+   Pie y vacío
+   ====================================================================== */
+
+.site-foot {
+  border-top: 1px solid var(--line);
+  padding: 28px 0 40px;
+  font-size: 13px;
+  color: var(--faint);
+}
+
+.empty {
+  padding: 120px 0;
+  text-align: center;
+}
+.empty h1 { font-weight: 900; font-size: 40px; letter-spacing: -0.03em; }
+.empty p { color: var(--muted); }
+.empty a { font-weight: 700; border-bottom: 2px solid var(--ink); }
+
+/* ======================================================================
+   Responsive
+   ====================================================================== */
+
+@media (max-width: 640px) {
+  .wrap { padding: 0 20px; }
+  .intro { padding: 44px 0 28px; }
+  .cmp-row {
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas: "label label" "exp real" "delta delta";
+    gap: 8px 16px;
+  }
+  .cmp-row .cmp-label { grid-area: label; }
+  .delta { grid-area: delta; justify-self: start; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+}

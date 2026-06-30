@@ -1,0 +1,98 @@
+# Growth Dashboards
+
+Aplicación web (Flask) para alojar múltiples dashboards de experimentos de
+Growth. La portada es un mosaico de experimentos; cada uno tiene sus vistas
+(proyección, seguimiento, …). Pensada para vivir en GitHub y desplegarse en
+Render.
+
+La idea central: **no se toca el código para sumar un experimento**. Cada
+experimento es una carpeta dentro de `projects/` que respeta una convención;
+la app la descubre y la publica sola.
+
+## Estructura
+
+```
+growth-dashboards/
+├── app.py                  # rutas (genéricas, no conocen ningún proyecto)
+├── core/registry.py        # descubre las carpetas de projects/
+├── templates/              # base, mosaico (index), shell de dashboard, 404
+├── static/css/main.css     # estilo (crema · hueso · gris oscuro · Lato)
+├── projects/
+│   ├── puesta_en_marcha_ltv/
+│   │   ├── meta.json        # ficha: título, subtítulo, vistas, orden
+│   │   ├── data/            # datos crudos (Data_2025.csv, Data_2026.csv)
+│   │   ├── processor.py     # build() -> {"proyeccion": {...}, "seguimiento": {...}}
+│   │   └── templates/
+│   │       ├── proyeccion.html
+│   │       └── seguimiento.html
+│   └── proyecto_demo/        # copia idéntica, solo cambia el nombre de carpeta
+├── requirements.txt
+├── render.yaml / Procfile / runtime.txt
+└── .gitignore
+```
+
+## Correr en local
+
+```bash
+cd growth-dashboards
+python -m venv .venv
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+python app.py
+```
+
+Abrir http://127.0.0.1:5000
+
+Para recalcular las métricas de un proyecto sin reiniciar:
+añade `?refresh=1` a la URL de una vista.
+
+## Subir a GitHub
+
+```bash
+cd growth-dashboards
+git init
+git add .
+git commit -m "Growth Dashboards: estructura inicial + experimento LTV"
+git branch -M main
+git remote add origin https://github.com/<usuario>/<repo>.git
+git push -u origin main
+```
+
+## Conectar a Render
+
+1. Render → **New +** → **Web Service** → conecta el repo de GitHub.
+2. Render detecta `render.yaml`. Si pide los campos a mano:
+   - **Build Command:** `pip install -r requirements.txt`
+   - **Start Command:** `gunicorn app:app`
+   - **Runtime:** Python 3
+3. Deploy. Cada `git push` a `main` vuelve a desplegar (autoDeploy).
+
+> Plan Free de Render: el servicio se duerme tras inactividad; la primera
+> carga tras dormir tarda unos segundos.
+
+## Agregar un experimento nuevo
+
+1. Copia una carpeta de `projects/` con un nombre nuevo (sin espacios).
+2. Edita su `meta.json` (`slug`, `title`, `subtitle`, `views`, `order`).
+3. Pon tus datos en `data/`.
+4. Ajusta `processor.py` → `build()` para que devuelva el contexto de cada vista.
+5. Ajusta las plantillas en `templates/` (o reutiliza las que ya hay).
+
+Commit + push y aparece solo en el mosaico. No se edita `app.py`.
+
+### Contrato de un proyecto
+
+- `meta.json`: al menos `slug`, `title` y `views` (lista de `{slug, label}`).
+- `processor.py`: una función `build()` que devuelve un dict cuyas claves son
+  los `slug` de las vistas y cada valor es el contexto que recibe la plantilla.
+- `templates/<vista>.html`: extiende `dashboard_base.html` y rellena
+  `{% block view %}`.
+
+## Sobre el experimento LTV
+
+- **Proyección** (Data_2025): impacto esperado de ampliar topes de LTV, calculado
+  sobre el histórico. Métrica destacada: desembolso adicional anual estimado.
+- **Seguimiento** (Data_2026): impacto real desde el 27-mar-2026, con comparación
+  esperado vs. real en conversión, ticket y días de cierre.
+
+La lógica de `processor.py` replica la notebook `Puesta_en_Marcha_LTV.ipynb`.

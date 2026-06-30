@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Experimentos · Growth Dashboards{% endblock %}
+
+{% block body %}
+<section class="intro">
+  <div class="wrap">
+    <span class="eyebrow">Experimentos</span>
+    <h1>Cada propuesta, su impacto esperado y el real.</h1>
+    <p>Selecciona un experimento para ver su proyección y su seguimiento.</p>
+  </div>
+</section>
+
+<section class="wrap">
+  <div class="mosaic">
+    {% for p in projects %}
+    <a class="tile" href="{{ url_for('project_home', slug=p.slug) }}">
+      {% if p.tag %}<span class="tile-tag">{{ p.tag }}</span>{% endif %}
+      <h2>{{ p.title }}</h2>
+      {% if p.subtitle %}<span class="tile-sub">{{ p.subtitle }}</span>{% endif %}
+      {% if p.description %}<p>{{ p.description }}</p>{% endif %}
+      <div class="tile-foot">
+        <span class="views">
+          {% for v in p.views %}<span>{{ v.label }}</span>{% endfor %}
+        </span>
+        <span class="arrow">&rarr;</span>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

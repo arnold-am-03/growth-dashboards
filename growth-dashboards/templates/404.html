@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}No encontrado · Growth Dashboards{% endblock %}
+{% block body %}
+<section class="empty">
+  <div class="wrap">
+    <h1>404</h1>
+    <p>Esa vista no existe. <a href="{{ url_for('index') }}">Volver a experimentos</a></p>
+  </div>
+</section>
+{% endblock %}

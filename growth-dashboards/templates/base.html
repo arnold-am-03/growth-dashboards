@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Growth Dashboards{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+</head>
+<body>
+  <header class="site-head">
+    <div class="wrap">
+      <a class="brand" href="{{ url_for('index') }}">Growth<span class="dot"> · </span>Dashboards</a>
+      <nav>Prestamype</nav>
+    </div>
+  </header>
+
+  {% block body %}{% endblock %}
+
+  <footer class="site-foot">
+    <div class="wrap">Panel interno · Growth &amp; Performance</div>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}{{ project.title }} · {{ current_view|capitalize }}{% endblock %}
+
+{% block body %}
+<section class="proj-head">
+  <div class="wrap">
+    <a class="back" href="{{ url_for('index') }}">&larr; Experimentos</a>
+    <h1>{{ project.title }}</h1>
+    {% if project.subtitle %}<p class="sub">{{ project.subtitle }}</p>{% endif %}
+    <div class="tabs">
+      {% for v in views %}
+      <a href="{{ url_for('project_view', slug=project.slug, view=v.slug) }}"
+         class="{{ 'active' if v.slug == current_view else '' }}">{{ v.label }}</a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="view">
+  <div class="wrap">
+    {% block view %}{% endblock %}
+  </div>
+</section>
+{% endblock %}

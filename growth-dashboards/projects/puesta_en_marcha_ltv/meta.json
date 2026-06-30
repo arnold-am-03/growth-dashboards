@@ -1,0 +1,12 @@
+{
+  "slug": "puesta_en_marcha_ltv",
+  "title": "Puesta en Marcha LTV",
+  "subtitle": "Ampliación de topes de LTV",
+  "description": "Impacto de ampliar los límites de LTV en zonas principales sobre conversión, volumen desembolsado y tiempo de cierre.",
+  "tag": "Riesgo · Originación",
+  "order": 1,
+  "views": [
+    { "slug": "proyeccion", "label": "Proyección" },
+    { "slug": "seguimiento", "label": "Seguimiento" }
+  ]
+}

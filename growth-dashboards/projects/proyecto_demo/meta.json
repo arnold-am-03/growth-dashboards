@@ -1,0 +1,12 @@
+{
+  "slug": "proyecto_demo",
+  "title": "Proyecto Demo",
+  "subtitle": "Copia de plantilla",
+  "description": "Carpeta duplicada del proyecto LTV (mismos datos) para comprobar que un nuevo experimento aparece solo en el mosaico. Reemplázala por un experimento real.",
+  "tag": "Plantilla",
+  "order": 2,
+  "views": [
+    { "slug": "proyeccion", "label": "Proyección" },
+    { "slug": "seguimiento", "label": "Seguimiento" }
+  ]
+}
