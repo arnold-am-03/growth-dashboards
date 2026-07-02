@@ -1,0 +1,120 @@
+{% extends "dashboard_base.html" %}
+
+{% block view %}
+<span class="view-note">Base histórica · 2025 · contratos cerrados</span>
+
+<div class="hero">
+  <div class="figure">{{ f.adicional }}<small> / año</small></div>
+  <div class="figure-label">
+    Comisión <strong>adicional anual estimada</strong> si los casos P2P Digital de
+    cuota fija en soles hubieran pagado el tarifario Fast Track en 2025.
+  </div>
+</div>
+
+<div class="cards">
+  <div class="metric">
+    <div class="k">Casos Fast Track</div>
+    <div class="v">{{ f.n_casos }}</div>
+    <div class="note">P2P · Digital · CF · PEN · 2025</div>
+  </div>
+  <div class="metric">
+    <div class="k">Comisión por caso</div>
+    <div class="v">{{ f.com_caso }}</div>
+    <div class="note">promedio del segmento</div>
+  </div>
+  <div class="metric">
+    <div class="k">Comisión total</div>
+    <div class="v">{{ f.com_total }}</div>
+    <div class="note">recaudación del segmento</div>
+  </div>
+  <div class="metric">
+    <div class="k">Adicional por caso</div>
+    <div class="v">{{ f.adic_caso }}</div>
+    <div class="note">comisión proyectada - real</div>
+  </div>
+  <div class="metric">
+    <div class="k">Días de cierre</div>
+    <div class="v">{{ f.dias }}</div>
+    <div class="note">promedio del segmento</div>
+  </div>
+</div>
+
+<div class="block">
+  <h3>Recaudación histórica vs. proyectada</h3>
+  <p class="desc">
+    Comisión efectivamente cobrada al segmento en 2025 frente a la que se habría cobrado
+    con el tarifario Fast Track, manteniendo la posición de cada caso frente a su comisión ideal.
+  </p>
+  <div class="vs">
+    <div class="vs-fig"><span class="vs-k">Histórica</span><span class="vs-v">{{ f.com_hist_full }}</span></div>
+    <div class="vs-arrow">&rarr;</div>
+    <div class="vs-fig"><span class="vs-k">Proyectada</span><span class="vs-v">{{ f.com_proy_full }}</span></div>
+    <div class="vs-badge">+{{ f.adicional }} · +{{ uplift }}</div>
+  </div>
+  <div class="chart">{{ inc_chart | safe }}</div>
+</div>
+
+<div class="block">
+  <h3>Rangos mensuales del histórico</h3>
+  <p class="desc">
+    Variabilidad observada mes a mes en 2025. La recaudación adicional combina el escenario
+    del mes más débil (menor adicional por caso × menos casos) y el del más fuerte.
+  </p>
+  <div class="cards">
+    <div class="metric">
+      <div class="k">Adicional por caso · mes</div>
+      <div class="v v-sm">{{ f.r_adic_caso }}</div>
+      <div class="note">promedio mensual mín – máx</div>
+    </div>
+    <div class="metric">
+      <div class="k">Casos por mes</div>
+      <div class="v v-sm">{{ f.r_casos }}</div>
+      <div class="note">promedio {{ f.r_casos_prom }} casos/mes</div>
+    </div>
+    <div class="metric">
+      <div class="k">Recaudación adicional · mes</div>
+      <div class="v v-sm">{{ f.r_recaud }}</div>
+      <div class="note">escenario mínimo – máximo</div>
+    </div>
+  </div>
+</div>
+
+<div class="block">
+  <h3>Panorama global 2025</h3>
+  <p class="desc">Todos los contratos cerrados del año, como referencia del negocio.</p>
+  <div class="cards">
+    <div class="metric">
+      <div class="k">Contratos cerrados</div>
+      <div class="v">{{ f.g_cerrados }}</div>
+      <div class="note">{{ f.g_cerrados_mes }} por mes</div>
+    </div>
+    <div class="metric">
+      <div class="k">Comisión por caso</div>
+      <div class="v">{{ f.g_com_caso }}</div>
+      <div class="note">promedio global</div>
+    </div>
+    <div class="metric">
+      <div class="k">Comisión total</div>
+      <div class="v">{{ f.g_com_total }}</div>
+      <div class="note">recaudación global</div>
+    </div>
+    <div class="metric">
+      <div class="k">Días de cierre</div>
+      <div class="v">{{ f.g_dias }}</div>
+      <div class="note">promedio global</div>
+    </div>
+    <div class="metric">
+      <div class="k">Tasa de casos</div>
+      <div class="v">{{ f.g_tasa_casos }}</div>
+      <div class="note">del total son Fast Track</div>
+    </div>
+    <div class="metric">
+      <div class="k">Comisión / monto</div>
+      <div class="v">{{ f.g_ratio }}</div>
+      <div class="note">ratio promedio del segmento</div>
+    </div>
+  </div>
+</div>
+
+{% if evol %}{% include "_evolucion.html" %}{% endif %}
+{% endblock %}

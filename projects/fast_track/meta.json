@@ -1,0 +1,10 @@
+{
+  "slug": "fast_track",
+  "title": "Fast Track",
+  "tags": ["Ingresos"],
+  "order": 4,
+  "views": [
+    { "slug": "proyeccion", "label": "Proyección" },
+    { "slug": "seguimiento", "label": "Seguimiento" }
+  ]
+}

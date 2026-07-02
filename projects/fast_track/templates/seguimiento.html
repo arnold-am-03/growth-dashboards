@@ -1,0 +1,66 @@
+{% extends "dashboard_base.html" %}
+
+{% block view %}
+<span class="view-note">Desde el lanzamiento · 25 abr 2026</span>
+
+<div class="hero">
+  <div class="figure">{{ f.adicional }}</div>
+  <div class="figure-label">
+    Recaudación <strong>adicional acumulada</strong>: comisión cobrada por encima de la
+    ideal ajustada sin la propuesta, en casos Fast Track creados y cerrados tras el lanzamiento.
+  </div>
+</div>
+
+<div class="cards">
+  <div class="metric">
+    <div class="k">Casos Fast Track</div>
+    <div class="v">{{ f.n_casos }}</div>
+    <div class="note">en {{ f.n_meses }} meses · {{ f.cerrados_mes }} cierres/mes globales</div>
+  </div>
+  <div class="metric">
+    <div class="k">Comisión del segmento</div>
+    <div class="v">{{ f.com_real }}</div>
+    <div class="note">{{ f.com_real_full }}</div>
+  </div>
+  <div class="metric">
+    <div class="k">Adicional por caso</div>
+    <div class="v">{{ f.adic_caso }}</div>
+    <div class="note">real - esperada por caso</div>
+  </div>
+  <div class="metric">
+    <div class="k">Comisión / monto</div>
+    <div class="v">{{ f.ratio }}</div>
+    <div class="note">ratio promedio de los casos</div>
+  </div>
+  <div class="metric">
+    <div class="k">Días de cierre</div>
+    <div class="v">{{ f.dias }}</div>
+    <div class="note">promedio de los casos</div>
+  </div>
+</div>
+
+<div class="block">
+  <h3>Esperado vs. real</h3>
+  <p class="desc">
+    Lo observado desde el lanzamiento frente a la comisión ideal ajustada sin la propuesta
+    y frente a las referencias del histórico 2025 (mínimos mensuales, para un arranque conservador).
+  </p>
+  <div class="compare">
+    {% for c in comp %}
+    <div class="cmp-row">
+      <div class="cmp-label">{{ c.label }}{% if c.ref %} <span class="cmp-ref">vs. {{ c.ref }}</span>{% endif %}</div>
+      <div class="cmp-val expected"><span class="tag">Esperado</span><span class="n">{{ c.esperado }}</span></div>
+      <div class="cmp-val"><span class="tag">Real</span><span class="n">{{ c.real }}</span></div>
+      {% if c.delta is none %}
+        <span class="delta flat">-</span>
+      {% else %}
+        {% set positivo = (c.delta >= 0 and c.mejor == 'alto') or (c.delta < 0 and c.mejor == 'bajo') %}
+        <span class="delta {{ 'up' if positivo else 'down' }}">{{ '+' if c.delta >= 0 else '' }}{{ (c.delta * 100) | round(1) }}%</span>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+{% if evol %}{% include "_evolucion.html" %}{% endif %}
+{% endblock %}
