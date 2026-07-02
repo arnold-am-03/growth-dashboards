@@ -154,16 +154,18 @@ def line_chart(labels, values, *, y_fmt, tip_fmt=None, height=150):
     return "".join(parts)
 
 
-def increment_bars(hist, pot, *, fmt, height=230):
-    """Historico vs Potencial. El potencial lleva un cap de color acento
-    igual al incremento, para que la diferencia se note pese a ser pequena."""
+def increment_bars(hist, pot, *, fmt, height=230,
+                   label_a="Histórico", label_b="Potencial",
+                   label_inc="Adicional"):
+    """Comparacion A vs B. La barra B lleva un cap de color acento igual al
+    incremento, para que la diferencia se note pese a ser pequena."""
     H = height
     pad_bot = 34
     plot_top, plot_bot = PAD_T, H - pad_bot
     span = plot_bot - plot_top
     ticks, top = _ticks(max(hist, pot) or 1)
 
-    cats = [("Histórico", hist, False), ("Potencial", pot, True)]
+    cats = [(label_a, hist, False), (label_b, pot, True)]
     n = len(cats)
     slot = (W - PAD_L - PAD_R) / n
     bar_w = min(slot * 0.32, 120)
@@ -191,12 +193,12 @@ def increment_bars(hist, pot, *, fmt, height=230):
             parts.append(
                 f'<rect class="bar" x="{x:.1f}" y="{y_base:.1f}" '
                 f'width="{bar_w:.1f}" height="{base_h:.1f}" rx="0" '
-                f'data-tip="{escape("Histórico · " + fmt(hist))}"/>'
+                f'data-tip="{escape(label_a + " · " + fmt(hist))}"/>'
             )
             parts.append(
                 f'<rect class="bar cap" x="{x:.1f}" y="{y_inc:.1f}" '
                 f'width="{bar_w:.1f}" height="{max(inc_h,3):.1f}" rx="4" '
-                f'data-tip="{escape("Adicional · " + fmt(pot - hist))}"/>'
+                f'data-tip="{escape(label_inc + " · " + fmt(pot - hist))}"/>'
             )
             # guia punteada que marca el nivel del historico
             parts.append(
@@ -207,6 +209,84 @@ def increment_bars(hist, pot, *, fmt, height=230):
             f'<text class="x-lab" x="{cx:.1f}" y="{H - 12:.1f}" '
             f'text-anchor="middle">{escape(lab)}</text>'
         )
+
+    parts.append("</svg>")
+    return "".join(parts)
+
+
+def dual_bar_chart(points, *, y_fmt, tip_fmt=None,
+                   name_a="Serie A", name_b="Serie B", height=260):
+    """Barras agrupadas (dos series por periodo). La serie A usa tinta
+    (referencia) y la B el color acento (propuesta/real destacado).
+
+    points: [{"label": str, "a": float, "b": float, "caption": str?}]
+    """
+    if not points:
+        return ""
+    tip_fmt = tip_fmt or y_fmt
+    H = height
+    pad_bot = 46
+    plot_top, plot_bot = PAD_T + 14, H - pad_bot  # deja sitio a la leyenda
+    span = plot_bot - plot_top
+    n = len(points)
+    slot = (W - PAD_L - PAD_R) / n
+    bar_w = min(slot * 0.26, 30)
+    gap = min(6, bar_w * 0.3)
+
+    vals = []
+    for p in points:
+        vals.append(max(0.0, float(p.get("a") or 0)))
+        vals.append(max(0.0, float(p.get("b") or 0)))
+    ticks, top = _ticks(max(vals) or 1)
+
+    parts = [f'<svg class="svg-chart" viewBox="0 0 {W} {H}" width="100%" '
+             f'preserveAspectRatio="xMidYMid meet" role="img">']
+    _grid_and_yaxis(parts, top, ticks, plot_top, plot_bot, y_fmt)
+
+    # leyenda
+    lx = W - PAD_R - 8
+    parts.append(
+        f'<g class="legend" text-anchor="end">'
+        f'<text class="lg-lab" x="{lx}" y="14">{escape(name_b)}</text>'
+        f'<rect class="lg-sw b" x="{lx - len(name_b) * 7 - 26}" y="5" '
+        f'width="12" height="12" rx="3"/>'
+        f'</g>'
+    )
+    lx2 = lx - len(name_b) * 7 - 44
+    parts.append(
+        f'<g class="legend" text-anchor="end">'
+        f'<text class="lg-lab" x="{lx2}" y="14">{escape(name_a)}</text>'
+        f'<rect class="lg-sw a" x="{lx2 - len(name_a) * 7 - 26}" y="5" '
+        f'width="12" height="12" rx="3"/>'
+        f'</g>'
+    )
+
+    for i, p in enumerate(points):
+        cx = PAD_L + i * slot + slot / 2
+        va = max(0.0, float(p.get("a") or 0))
+        vb = max(0.0, float(p.get("b") or 0))
+        for j, (v, cls, nm) in enumerate(
+            [(va, "a", name_a), (vb, "b", name_b)]
+        ):
+            bh = (v / top) * span if top else 0
+            x = cx - (bar_w + gap / 2) + j * (bar_w + gap)
+            y = plot_bot - bh
+            tip = f'{p["label"]} · {nm} · {tip_fmt(v)}'
+            parts.append(
+                f'<rect class="bar {cls}" x="{x:.1f}" y="{y:.1f}" '
+                f'width="{bar_w:.1f}" height="{bh:.1f}" rx="3" '
+                f'data-tip="{escape(tip)}" '
+                f'style="animation-delay:{i * 0.05:.2f}s"/>'
+            )
+        parts.append(
+            f'<text class="x-lab" x="{cx:.1f}" y="{H - 26:.1f}" '
+            f'text-anchor="middle">{escape(str(p["label"]))}</text>'
+        )
+        if p.get("caption"):
+            parts.append(
+                f'<text class="x-cap" x="{cx:.1f}" y="{H - 11:.1f}" '
+                f'text-anchor="middle">{escape(str(p["caption"]))}</text>'
+            )
 
     parts.append("</svg>")
     return "".join(parts)

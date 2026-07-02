@@ -1,7 +1,7 @@
 {
   "slug": "extension_de_plazos",
   "title": "Extensión de plazos para perfiles seguros",
-  "tags": ["Clientes Nuevos","Ingresos", "% de Conversión (Oportunidades/Leads)"],
+  "tags": ["Ingresos", "% de Conversión (Oportunidades/Leads)"],
   "order": 2,
   "views": [
     { "slug": "proyeccion", "label": "Proyección" },

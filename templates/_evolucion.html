@@ -5,7 +5,7 @@
   </div>
   <p class="desc">Casos agrupados por período de cierre.</p>
 
-  <div class="chart-title">Volumen desembolsado por mes <span>(soles)</span></div>
+  <div class="chart-title">{{ evol.vol_title or 'Volumen desembolsado por mes' }} <span>({{ evol.vol_unit or 'soles' }})</span></div>
   <div class="chart">{{ evol.vol_chart | safe }}</div>
 
   <div class="series">

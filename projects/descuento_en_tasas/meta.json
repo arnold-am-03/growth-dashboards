@@ -1,8 +1,8 @@
 {
-  "slug": "puesta_en_marcha_ltv",
-  "title": "Aumento de LTV para segmento de buenos pagadores",
+  "slug": "descuento_en_tasas",
+  "title": "Descuento en tasas",
   "tags": ["Ingresos"],
-  "order": 1,
+  "order": 3,
   "views": [
     { "slug": "proyeccion", "label": "Proyección" },
     { "slug": "seguimiento", "label": "Seguimiento" }
