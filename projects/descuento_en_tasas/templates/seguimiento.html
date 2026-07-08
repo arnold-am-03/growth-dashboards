@@ -1,7 +1,7 @@
 {% extends "dashboard_base.html" %}
 
 {% block view %}
-<span class="view-note">Desde el lanzamiento · 15 may 2026</span>
+<span class="view-note">Desde el lanzamiento · 15 may 2026</span>{% if datos_hasta %} <span class="view-note nota-datos">Datos hasta · {{ datos_hasta }}</span>{% endif %}
 
 <div class="hero">
   <div class="figure">{{ f.adicional }}</div>

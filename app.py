@@ -90,11 +90,17 @@ def project_view(slug, view):
     data = get_project_data(project, refresh=refresh)
     context = data.get(view, {})
 
+    # notas contextuales/metodológicas opcionales del proyecto
+    notas_tpl = None
+    if (project.path / "templates" / "_notas.html").exists():
+        notas_tpl = f"{project.dirname}/templates/_notas.html"
+
     return render_template(
         project.template_for(view),
         project=project,
         views=project.views,
         current_view=view,
+        notas_tpl=notas_tpl,
         **context,
     )
 

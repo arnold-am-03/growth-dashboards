@@ -196,6 +196,7 @@ def _proyeccion():
     meses_n = len(rows)
 
     return {
+        "datos_hasta": _hasta(df),
         "f": {
             "n_casos": f"{n_casos}",
             "com_caso": soles(casos["Comision"].mean()),
@@ -279,6 +280,7 @@ def _seguimiento(proy_raw):
         return (real - esp) / esp
 
     return {
+        "datos_hasta": _hasta(df),
         "f": {
             "n_casos": f"{n_casos}",
             "n_meses": f"{meses_n}",
@@ -328,3 +330,21 @@ def build():
     proy = _proyeccion()
     seg = _seguimiento(proy.pop("_raw"))
     return {"proyeccion": proy, "seguimiento": seg}
+
+
+# --- Fecha de corte de los datos ----------------------------------------
+
+_MESES_MIN = ["ene", "feb", "mar", "abr", "may", "jun",
+              "jul", "ago", "sep", "oct", "nov", "dic"]
+
+
+def _hasta(df):
+    """Fecha maxima de cierre presente en la data: hasta cuando esta
+    actualizado el dashboard."""
+    try:
+        f = pd.to_datetime(df["Fecha de Cierre"], errors="coerce").max()
+        if pd.isna(f):
+            return None
+        return f"{f.day} {_MESES_MIN[f.month - 1]} {f.year}"
+    except Exception:
+        return None

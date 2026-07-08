@@ -1,7 +1,7 @@
 {% extends "dashboard_base.html" %}
 
 {% block view %}
-<span class="view-note">Base histórica · 2025 · contratos cerrados</span>
+<span class="view-note">Base histórica · 2025 · contratos cerrados</span>{% if datos_hasta %} <span class="view-note nota-datos">Datos hasta · {{ datos_hasta }}</span>{% endif %}
 
 <div class="hero">
   <div class="figure">{{ f.adicional }}<small> / año</small></div>

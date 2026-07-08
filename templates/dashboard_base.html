@@ -19,6 +19,11 @@
 <section class="view">
   <div class="wrap">
     {% block view %}{% endblock %}
+    {% if notas_tpl %}
+    <div class="block notas">
+      {% include notas_tpl %}
+    </div>
+    {% endif %}
   </div>
 </section>
 {% endblock %}
