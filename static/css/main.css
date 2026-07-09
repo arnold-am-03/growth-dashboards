@@ -441,3 +441,34 @@ a { color: inherit; text-decoration: none; }
 .nota p { margin: 0; font-size: 14px; color: var(--muted); line-height: 1.68; }
 .nota p + p { margin-top: 8px; }
 .nota strong { color: var(--ink); font-weight: 700; }
+
+
+/* ===== Login OTP ====================================================== */
+
+.login-pin {
+  font-size: 24px; font-weight: 900; letter-spacing: 0.4em;
+  text-align: center;
+}
+.login-aviso {
+  background: var(--accent-soft); border: 1px solid var(--accent-edge);
+  color: var(--accent-ink); font-weight: 700; font-size: 13px;
+  padding: 10px 14px; border-radius: 2px; margin-bottom: 18px;
+}
+.login-links {
+  margin-top: 18px; display: flex; align-items: center; gap: 10px;
+  font-size: 13px; font-weight: 700;
+}
+.login-links a { color: var(--accent-ink); border-bottom: 1px solid var(--accent-edge); }
+.login-links .sep { color: var(--faint); }
+.inline-form { display: inline; }
+.link-btn {
+  background: none; border: none; padding: 0; cursor: pointer;
+  font: 700 13px "Lato", sans-serif; color: var(--accent-ink);
+  border-bottom: 1px solid var(--accent-edge);
+}
+.link-btn:hover, .login-links a:hover { color: var(--ink); }
+
+.site-head nav .who {
+  font-size: 12.5px; font-weight: 700; color: var(--faint);
+  letter-spacing: 0;
+}

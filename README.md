@@ -117,19 +117,27 @@ La lógica de `processor.py` replica la notebook `Puesta_en_Marcha_LTV.ipynb`.
 
 ## Acceso / seguridad
 
-Toda la plataforma está detrás de un inicio de sesión por contraseña de equipo.
-La clave **no** vive en el código ni se envía al navegador: se lee de variables
-de entorno del servidor y la sesión se guarda en una cookie firmada (HttpOnly y
-Secure en producción).
+El acceso es por **código de un solo uso (OTP) al correo corporativo**:
 
-Variables de entorno a definir en Render (Environment):
+1. La persona ingresa su correo `@prestamype.com`, que además debe estar en la
+   lista de permitidos (`ALLOWED_EMAILS`, correos separados por coma; si no se
+   define, aplica la lista por defecto del código).
+2. Recibe un PIN de 6 dígitos por correo, válido por 15 minutos (máx. 5
+   intentos, reenvío con espera de 60 s).
+3. La sesión queda abierta 7 días en una cookie firmada (HttpOnly, Secure en
+   producción). "Salir" en la cabecera cierra la sesión.
 
-- `SECRET_KEY` — cadena larga y aleatoria para firmar las sesiones.
-  Generar con: `python -c "import os;print(os.urandom(32).hex())"`
-- `APP_PASSWORD_HASH` — hash de la contraseña del equipo.
-  Generar con: `python scripts/gen_password_hash.py` (no guarda nada en texto plano).
+El PIN no se guarda en el servidor: viaja como HMAC firmado con `SECRET_KEY`,
+por lo que el flujo sobrevive a los reinicios del plan free de Render.
 
-Alternativa simple para desarrollo local: `APP_PASSWORD` con la clave en texto
-plano (solo local; en producción usar el hash). Ver `.env.example`.
+Variables de entorno (Render → Environment):
 
-Cerrar sesión: botón "Salir" en la cabecera (`/logout`).
+- `SECRET_KEY` — cadena larga y aleatoria (firma sesiones y PINs).
+- `ALLOWED_EMAILS` — lista de correos con acceso. Ampliarla = editar esta
+  variable; Render reinicia el servicio al guardar, sin tocar código.
+- `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD` (y opcional
+  `SMTP_FROM`) — cuenta que envía los códigos. Con Google Workspace:
+  `smtp.gmail.com` puerto `587` y un *App password* de la cuenta emisora.
+
+Sin SMTP configurado (desarrollo local), el PIN se imprime en los logs del
+servidor para poder probar el flujo.

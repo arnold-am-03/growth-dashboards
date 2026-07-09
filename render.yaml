@@ -9,10 +9,23 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: 3.12.8
-      # Clave para firmar las sesiones. Generar un valor largo y aleatorio.
-      # Definir en el dashboard de Render (no se versiona).
+      # Clave para firmar sesiones y códigos OTP. Valor largo y aleatorio.
       - key: SECRET_KEY
         sync: false
-      # Hash de la contraseña del equipo (python scripts/gen_password_hash.py).
-      - key: APP_PASSWORD_HASH
+      # Correos con acceso, separados por coma. Amplía la lista aquí
+      # (sin tocar código): Render reinicia el servicio al guardarla.
+      - key: ALLOWED_EMAILS
+        sync: false
+      # SMTP para enviar los códigos (p.ej. Google Workspace):
+      #   SMTP_HOST=smtp.gmail.com  SMTP_PORT=587
+      #   SMTP_USER=cuenta@prestamype.com  SMTP_PASSWORD=app-password
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        sync: false
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASSWORD
+        sync: false
+      - key: SMTP_FROM
         sync: false

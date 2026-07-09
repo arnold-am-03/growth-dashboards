@@ -20,7 +20,7 @@
         <span class="brand-name">Growth Innovation</span>
         <span class="brand-tag">Experimentos de la Bitacorita</span>
       </a>
-      <nav><span>Prestamype</span><a class="logout" href="{{ url_for('auth.logout') }}">Salir</a></nav>
+      <nav>{% if session.get('email') %}<span class="who">{{ session['email'] }}</span>{% else %}<span>Prestamype</span>{% endif %}<a class="logout" href="{{ url_for('auth.logout') }}">Salir</a></nav>
     </div>
   </header>
 
