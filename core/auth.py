@@ -23,11 +23,14 @@ Seguridad / diseno:
 Variables de entorno:
   SECRET_KEY       firma de sesiones y PINs (obligatoria en produccion)
   ALLOWED_EMAILS   p.ej. "aaguirre@prestamype.com,rhinojosa@prestamype.com"
-  SMTP_HOST        p.ej. smtp.gmail.com
-  SMTP_PORT        587 (STARTTLS) o 465 (SSL)
-  SMTP_USER        cuenta que envia
-  SMTP_PASSWORD    clave o app password
-  SMTP_FROM        remitente visible (opcional; por defecto SMTP_USER)
+
+  Envio de correo (en orden de preferencia):
+  1) API HTTPS de Brevo — funciona en Render, que bloquea SMTP saliente:
+     BREVO_API_KEY   clave API (Brevo -> SMTP y API -> Claves API)
+     SMTP_FROM       remitente verificado en Brevo
+  2) SMTP clasico (otros hosts): SMTP_HOST, SMTP_PORT, SMTP_USER,
+     SMTP_PASSWORD y opcional SMTP_FROM.
+  3) Sin nada configurado (desarrollo): el PIN se imprime en los logs.
 """
 
 from __future__ import annotations
@@ -144,29 +147,8 @@ def _verificar_reto(pin_ingresado: str) -> tuple[bool, str]:
 # --- Envio de correo ------------------------------------------------------
 
 
-def _enviar_correo(correo: str, pin: str, logger) -> tuple[bool, str | None]:
-    host = os.environ.get("SMTP_HOST")
-    user = os.environ.get("SMTP_USER")
-    pwd = os.environ.get("SMTP_PASSWORD")
-
-    if not (host and user and pwd):
-        # Modo desarrollo: sin SMTP, el PIN queda en los logs del servidor.
-        logger.warning("SMTP no configurado. PIN para %s: %s", correo, pin)
-        return True, "dev"
-
-    puerto = int(os.environ.get("SMTP_PORT", "587"))
-    remitente = os.environ.get("SMTP_FROM", user)
-
-    msg = EmailMessage()
-    msg["Subject"] = f"Tu código de acceso: {pin}"
-    msg["From"] = remitente
-    msg["To"] = correo
-    msg.set_content(
-        "Growth Innovation | Experimentos de la Bitacorita\n\n"
-        f"Tu código de acceso es: {pin}\n\n"
-        "Vence en 15 minutos. Si no lo solicitaste, ignora este correo."
-    )
-    msg.add_alternative(f"""\
+def _cuerpo_html(pin: str) -> str:
+    return f"""\
 <html><body style="font-family:Arial,Helvetica,sans-serif;color:#2A2925;
 background:#FAF7F0;padding:28px">
   <div style="max-width:420px;margin:auto;background:#ffffff;
@@ -183,7 +165,88 @@ background:#FAF7F0;padding:28px">
     <div style="color:#76705F;font-size:12.5px">
       Vence en 15 minutos. Si no lo solicitaste, ignora este correo.</div>
   </div>
-</body></html>""", subtype="html")
+</body></html>"""
+
+
+def _cuerpo_texto(pin: str) -> str:
+    return (
+        "Growth Innovation | Experimentos de la Bitacorita\n\n"
+        f"Tu código de acceso es: {pin}\n\n"
+        "Vence en 15 minutos. Si no lo solicitaste, ignora este correo."
+    )
+
+
+def _enviar_por_api_brevo(correo: str, pin: str, logger) -> tuple[bool, str | None]:
+    """Envio por la API HTTPS de Brevo (puerto 443). Es la via que
+    funciona en Render, que bloquea los puertos SMTP salientes."""
+    import json
+    import urllib.error
+    import urllib.request
+
+    api_key = os.environ["BREVO_API_KEY"]
+    remitente = os.environ.get("SMTP_FROM") or os.environ.get("SMTP_USER")
+    if not remitente:
+        logger.error("BREVO_API_KEY definido pero falta SMTP_FROM (remitente).")
+        return False, "falta SMTP_FROM"
+
+    payload = json.dumps({
+        "sender": {"name": "Growth Innovation", "email": remitente},
+        "to": [{"email": correo}],
+        "subject": f"Tu código de acceso: {pin}",
+        "htmlContent": _cuerpo_html(pin),
+        "textContent": _cuerpo_texto(pin),
+    }).encode("utf-8")
+
+    req = urllib.request.Request(
+        "https://api.brevo.com/v3/smtp/email",
+        data=payload,
+        method="POST",
+        headers={
+            "api-key": api_key,
+            "content-type": "application/json",
+            "accept": "application/json",
+        },
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=20) as resp:
+            if 200 <= resp.status < 300:
+                return True, None
+            detalle = resp.read().decode("utf-8", "ignore")[:300]
+            logger.error("Brevo respondió %s: %s", resp.status, detalle)
+            return False, detalle
+    except urllib.error.HTTPError as e:
+        detalle = e.read().decode("utf-8", "ignore")[:300]
+        logger.error("Brevo HTTP %s: %s", e.code, detalle)
+        return False, detalle
+    except Exception as e:  # pragma: no cover
+        logger.error("Fallo llamando a la API de Brevo: %s", e)
+        return False, str(e)
+
+
+def _enviar_correo(correo: str, pin: str, logger) -> tuple[bool, str | None]:
+    # 1) API de Brevo (HTTPS): la via compatible con Render.
+    if os.environ.get("BREVO_API_KEY"):
+        return _enviar_por_api_brevo(correo, pin, logger)
+
+    # 2) SMTP clasico (otros hosts que si permiten SMTP saliente).
+    host = os.environ.get("SMTP_HOST")
+    user = os.environ.get("SMTP_USER")
+    pwd = os.environ.get("SMTP_PASSWORD")
+
+    if not (host and user and pwd):
+        # 3) Modo desarrollo: el PIN queda en los logs del servidor.
+        logger.warning("Envío de correo no configurado. PIN para %s: %s", correo, pin)
+        return True, "dev"
+
+    puerto = int(os.environ.get("SMTP_PORT", "587"))
+    remitente = os.environ.get("SMTP_FROM", user)
+
+    msg = EmailMessage()
+    msg["Subject"] = f"Tu código de acceso: {pin}"
+    msg["From"] = remitente
+    msg["To"] = correo
+    msg.set_content(_cuerpo_texto(pin))
+    msg.add_alternative(_cuerpo_html(pin), subtype="html")
 
     try:
         if puerto == 465:

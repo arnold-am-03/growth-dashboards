@@ -16,9 +16,12 @@ services:
       # (sin tocar código): Render reinicia el servicio al guardarla.
       - key: ALLOWED_EMAILS
         sync: false
-      # SMTP para enviar los códigos (p.ej. Google Workspace):
-      #   SMTP_HOST=smtp.gmail.com  SMTP_PORT=587
-      #   SMTP_USER=cuenta@prestamype.com  SMTP_PASSWORD=app-password
+      # Envío de códigos por la API de Brevo (HTTPS). Es la vía que
+      # funciona en Render, que bloquea los puertos SMTP salientes.
+      # SMTP_FROM = remitente verificado en Brevo.
+      - key: BREVO_API_KEY
+        sync: false
+      # SMTP clásico: solo para hosts que permiten SMTP saliente.
       - key: SMTP_HOST
         sync: false
       - key: SMTP_PORT

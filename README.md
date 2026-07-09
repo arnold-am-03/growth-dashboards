@@ -135,9 +135,11 @@ Variables de entorno (Render → Environment):
 - `SECRET_KEY` — cadena larga y aleatoria (firma sesiones y PINs).
 - `ALLOWED_EMAILS` — lista de correos con acceso. Ampliarla = editar esta
   variable; Render reinicia el servicio al guardar, sin tocar código.
-- `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD` (y opcional
-  `SMTP_FROM`) — cuenta que envía los códigos. Con Google Workspace:
-  `smtp.gmail.com` puerto `587` y un *App password* de la cuenta emisora.
+- `BREVO_API_KEY` y `SMTP_FROM` — envío de códigos por la API HTTPS de
+  Brevo (la vía que funciona en Render, que bloquea SMTP saliente).
+  `SMTP_FROM` debe ser un remitente verificado en Brevo.
+- Alternativa para hosts con SMTP saliente permitido: `SMTP_HOST`,
+  `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD` (y opcional `SMTP_FROM`).
 
 Sin SMTP configurado (desarrollo local), el PIN se imprime en los logs del
 servidor para poder probar el flujo.
