@@ -12,6 +12,7 @@ from flask import Flask, abort, redirect, render_template, request, url_for
 from jinja2 import ChoiceLoader, FileSystemLoader
 
 from core.auth import init_auth
+from core.fechas import fecha_subida_dir
 from core.registry import (
     BASE_DIR,
     PROJECTS_DIR,
@@ -61,6 +62,11 @@ def get_project_data(project, refresh=False):
 # --- Rutas -------------------------------------------------------------
 
 
+@app.route("/salud")
+def salud():
+    return {"ok": True}
+
+
 @app.route("/")
 def index():
     projects = sorted(get_registry().values(), key=lambda p: (p.order, p.title))
@@ -69,7 +75,9 @@ def index():
     if tags_path.exists():
         import json
         kpis = json.loads(tags_path.read_text(encoding="utf-8")).get("kpis", [])
-    return render_template("index.html", projects=projects, kpis=kpis)
+    fechas = {p.slug: fecha_subida_dir(p.path / "data") for p in projects}
+    return render_template("index.html", projects=projects, kpis=kpis,
+                           fechas=fechas)
 
 
 @app.route("/p/<slug>")

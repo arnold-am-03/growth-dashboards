@@ -56,7 +56,7 @@ from flask import (
 
 auth_bp = Blueprint("auth", __name__)
 
-OPEN_ENDPOINTS = {"auth.login", "auth.enviar", "auth.verificar", "static"}
+OPEN_ENDPOINTS = {"auth.login", "auth.enviar", "auth.verificar", "static", "salud"}
 
 DOMINIO = "@prestamype.com"
 PERMITIDOS_DEFAULT = [

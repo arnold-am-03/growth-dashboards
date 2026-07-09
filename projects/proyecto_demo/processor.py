@@ -25,6 +25,7 @@ import pandas as pd
 
 # permitir importar core.charts tanto en local como en Render
 sys.path.append(str(Path(__file__).resolve().parents[2]))
+from core.fechas import fecha_subida  # noqa: E402
 from core.charts import bar_chart, increment_bars, line_chart  # noqa: E402
 
 warnings.filterwarnings("ignore")
@@ -220,7 +221,7 @@ def _proyeccion():
     dias = casos["Dias de Cierre"].mean()
 
     return {
-        "datos_hasta": _hasta(df),
+        "datos_hasta": fecha_subida(DATA_DIR / "Data_2025.csv"),
         "f": {
             "n_elegibles": f"{n_casos}",
             "n_cerrados": f"{n_cerr}",
@@ -277,7 +278,7 @@ def _seguimiento(proy_raw):
         return (real - esp) / esp
 
     return {
-        "datos_hasta": _hasta(df),
+        "datos_hasta": fecha_subida(DATA_DIR / "Data_2026.csv"),
         "f": {
             "n_elegibles": f"{n_casos}",
             "n_cerrados": f"{n_cerr}",
@@ -307,20 +308,3 @@ def build():
     seg = _seguimiento(proy.pop("_raw"))
     return {"proyeccion": proy, "seguimiento": seg}
 
-
-# --- Fecha de corte de los datos ----------------------------------------
-
-_MESES_MIN = ["ene", "feb", "mar", "abr", "may", "jun",
-              "jul", "ago", "sep", "oct", "nov", "dic"]
-
-
-def _hasta(df):
-    """Fecha maxima de cierre presente en la data: hasta cuando esta
-    actualizado el dashboard."""
-    try:
-        f = pd.to_datetime(df["Fecha de Cierre"], errors="coerce").max()
-        if pd.isna(f):
-            return None
-        return f"{f.day} {_MESES_MIN[f.month - 1]} {f.year}"
-    except Exception:
-        return None

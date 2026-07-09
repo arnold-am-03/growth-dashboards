@@ -40,6 +40,7 @@ import numpy as np
 import pandas as pd
 
 sys.path.append(str(Path(__file__).resolve().parents[2]))
+from core.fechas import fecha_subida  # noqa: E402
 from core.charts import dual_bar_chart, increment_bars, line_chart  # noqa: E402
 
 warnings.filterwarnings("ignore")
@@ -195,8 +196,35 @@ def _proyeccion():
     esc_max = max(adic_caso_mes) * max(n_mes) if rows else float("nan")
     meses_n = len(rows)
 
+    # --- estadisticos mensuales del historico (referencias del seguimiento)
+    adic_mes = [r["adic"] for r in rows]
+    ratio_mes = [g["Ratio Comision/Monto"].mean()
+                 for _, g in casos.groupby("Periodo de Cierre")]
+    tasa_mensual = df.groupby("Periodo de Cierre")["Es Caso en Historico"].mean()
+
+    def _stats(vals):
+        if not vals:
+            return {"min": float("nan"), "prom": float("nan"), "max": float("nan")}
+        return {"min": min(vals), "prom": sum(vals) / len(vals), "max": max(vals)}
+
+    # --- panorama global por canal (Digital por defecto en la vista)
+    per_n = df["Periodo de Cierre"].nunique() or 1
+    global_por_canal = {}
+    for clave, sub in [("digital", df[df["Canal"] == "Digital"]),
+                       ("presencial", df[df["Canal"] == "Presencial"]),
+                       ("todos", df)]:
+        sub_casos = sub[sub["Es Caso en Historico"] == True]  # noqa: E712
+        global_por_canal[clave] = {
+            "cerrados": f"{len(sub):,}",
+            "cerrados_mes": f"{len(sub) / per_n:,.0f}",
+            "com_caso": soles(sub["Comision"].mean()) if len(sub) else "-",
+            "com_total": millones(sub["Comision"].sum()),
+            "dias": num(sub["Dias de Cierre"].mean()) if len(sub) else "-",
+            "tasa": pct(len(sub_casos) / len(sub)) if len(sub) else "-",
+        }
+
     return {
-        "datos_hasta": _hasta(df),
+        "datos_hasta": fecha_subida(DATA_DIR / "Data_Historica.csv"),
         "f": {
             "n_casos": f"{n_casos}",
             "com_caso": soles(casos["Comision"].mean()),
@@ -218,16 +246,21 @@ def _proyeccion():
             "r_casos_prom": num(sum(n_mes) / meses_n, 1) if meses_n else "-",
             "r_recaud": f"{miles(esc_min)} – {miles(esc_max)}",
         },
+        "g": global_por_canal,
         "inc_chart": increment_bars(com_hist, com_proy, fmt=lambda v: soles(v),
                                     label_a="Histórica", label_b="Proyectada"),
         "uplift": pct(adicional / com_hist) if com_hist else "-",
         "evol": _bloque_evolucion(rows, "Comisión real", "Comisión proyectada"),
         "_raw": {
-            "adic_caso_min_mes": min(adic_caso_mes) if rows else float("nan"),
-            "casos_mes_min": min(n_mes) if rows else float("nan"),
-            "esc_min": esc_min,
-            "tasa_casos": n_casos / n_total if n_total else float("nan"),
-            "ratio": casos["Ratio Comision/Monto"].mean(),
+            "com_esp_tag": "esperada",
+            "refs": {
+                "adic_caso": _stats(adic_caso_mes),
+                "casos_mes": _stats([float(n) for n in n_mes]),
+                "adic_mes": _stats(adic_mes),
+                "ratio": _stats(ratio_mes),
+                "tasa_anual": n_casos / n_total if n_total else float("nan"),
+                "tasa_prom_mensual": float(tasa_mensual.mean()),
+            },
         },
     }
 
@@ -279,8 +312,55 @@ def _seguimiento(proy_raw):
             return None
         return (real - esp) / esp
 
+    refs = proy_raw["refs"]
+
+    def fila(label, formula, real_num, real_fmt, opciones, default=0,
+             mejor="alto", tag_ref="Referencia"):
+        base = float(opciones[default]["num"])
+        d = ((float(real_num) - base) / abs(base)) if base else None
+        return {"label": label, "formula": formula, "real": real_fmt,
+                "real_num": float(real_num), "opciones": opciones,
+                "default": default, "delta": d, "mejor": mejor,
+                "tag_ref": tag_ref}
+
+    def ops(st, fmt):
+        return [
+            {"id": "prom", "label": "promedio 2025", "num": st["prom"], "fmt": fmt(st["prom"])},
+            {"id": "min", "label": "mínimo", "num": st["min"], "fmt": fmt(st["min"])},
+            {"id": "max", "label": "máximo", "num": st["max"], "fmt": fmt(st["max"])},
+        ]
+
+    comp = [
+        fila("Comisión total del segmento",
+             "comisión cobrada vs. la que se esperaba cobrar sin el ajuste",
+             com_real, miles(com_real),
+             [{"id": "esp", "label": "esperada", "num": com_esp, "fmt": miles(com_esp)}],
+             tag_ref="Esperado"),
+        fila("Comisión adicional por caso",
+             "comisión cobrada − comisión que se esperaba cobrar sin el ajuste, por caso",
+             adic_caso_real, soles(adic_caso_real),
+             ops(refs["adic_caso"], lambda v: soles(v))),
+        fila("Casos por mes",
+             "casos del experimento cerrados, en promedio mensual",
+             casos_mes_real, num(casos_mes_real, 1),
+             ops(refs["casos_mes"], lambda v: num(v, 1))),
+        fila("Recaudación adicional mensual",
+             "suma del adicional de los casos del mes",
+             adic_mes_real, miles(adic_mes_real),
+             ops(refs["adic_mes"], lambda v: miles(v))),
+        fila("Tasa de casos (Fast Track)",
+             "participación de los casos sobre el total de cierres",
+             tasa_real, pct(tasa_real),
+             [{"id": "anual", "label": "anual 2025", "num": refs["tasa_anual"], "fmt": pct(refs["tasa_anual"])},
+              {"id": "mes", "label": "prom. mensual 2025", "num": refs["tasa_prom_mensual"], "fmt": pct(refs["tasa_prom_mensual"])}]),
+        fila("Ratio comisión/monto",
+             "comisión / monto desembolsado, promedio de los casos",
+             ratio_real, num(ratio_real, 2),
+             ops(refs["ratio"], lambda v: num(v, 2))),
+    ]
+
     return {
-        "datos_hasta": _hasta(df),
+        "datos_hasta": fecha_subida(DATA_DIR / "Data_Seguimiento.csv"),
         "f": {
             "n_casos": f"{n_casos}",
             "n_meses": f"{meses_n}",
@@ -293,34 +373,8 @@ def _seguimiento(proy_raw):
             "ratio": num(ratio_real, 2),
             "cerrados_mes": f"{int(cerrados_mes + 0.5):,}",
         },
-        "comp": [
-            {"label": "Comisión total del segmento",
-             "esperado": miles(com_esp), "real": miles(com_real),
-             "delta": delta(com_real, com_esp), "mejor": "alto"},
-            {"label": "Comisión adicional por caso",
-             "esperado": soles(proy_raw["adic_caso_min_mes"]),
-             "real": soles(adic_caso_real),
-             "delta": delta(adic_caso_real, proy_raw["adic_caso_min_mes"]),
-             "mejor": "alto", "ref": "mínimo histórico"},
-            {"label": "Casos por mes",
-             "esperado": num(proy_raw["casos_mes_min"], 0),
-             "real": num(casos_mes_real, 1),
-             "delta": delta(casos_mes_real, proy_raw["casos_mes_min"]),
-             "mejor": "alto", "ref": "mínimo histórico"},
-            {"label": "Recaudación adicional mensual",
-             "esperado": miles(proy_raw["esc_min"]),
-             "real": miles(adic_mes_real),
-             "delta": delta(adic_mes_real, proy_raw["esc_min"]),
-             "mejor": "alto", "ref": "escenario mínimo"},
-            {"label": "Tasa de casos (Fast Track)",
-             "esperado": pct(proy_raw["tasa_casos"]), "real": pct(tasa_real),
-             "delta": delta(tasa_real, proy_raw["tasa_casos"]),
-             "mejor": "alto", "ref": "histórico 2025"},
-            {"label": "Ratio comisión/monto",
-             "esperado": num(proy_raw["ratio"], 2), "real": num(ratio_real, 2),
-             "delta": delta(ratio_real, proy_raw["ratio"]),
-             "mejor": "alto", "ref": "histórico 2025"},
-        ],
+        "comp": comp,
+
         "evol": _bloque_evolucion(rows, "Comisión esperada", "Comisión real",
                                   en_miles=True),
     }
@@ -331,20 +385,3 @@ def build():
     seg = _seguimiento(proy.pop("_raw"))
     return {"proyeccion": proy, "seguimiento": seg}
 
-
-# --- Fecha de corte de los datos ----------------------------------------
-
-_MESES_MIN = ["ene", "feb", "mar", "abr", "may", "jun",
-              "jul", "ago", "sep", "oct", "nov", "dic"]
-
-
-def _hasta(df):
-    """Fecha maxima de cierre presente en la data: hasta cuando esta
-    actualizado el dashboard."""
-    try:
-        f = pd.to_datetime(df["Fecha de Cierre"], errors="coerce").max()
-        if pd.isna(f):
-            return None
-        return f"{f.day} {_MESES_MIN[f.month - 1]} {f.year}"
-    except Exception:
-        return None

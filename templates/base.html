@@ -10,19 +10,26 @@
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23ECE5D6'/%3E%3Crect x='8' y='8' width='16' height='16' rx='3' fill='%231F5750'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
   <script defer src="{{ url_for('static', filename='js/charts.js') }}"></script>
+  <script defer src="{{ url_for('static', filename='js/loading.js') }}"></script>
+  <script defer src="{{ url_for('static', filename='js/toggles.js') }}"></script>
   {% block head %}{% endblock %}
 </head>
 <body>
   <header class="site-head">
     <div class="wrap">
       <a class="brand" href="{{ url_for('index') }}">
-        <span class="brand-mark"></span>
+        <img class="brand-logo" src="{{ url_for('static', filename='brand/logo.svg') }}" alt="">
         <span class="brand-name">Growth Innovation</span>
         <span class="brand-tag">Experimentos de la Bitacorita</span>
       </a>
       <nav>{% if session.get('email') %}<span class="who">{{ session['email'] }}</span>{% else %}<span>Prestamype</span>{% endif %}<a class="logout" href="{{ url_for('auth.logout') }}">Salir</a></nav>
     </div>
   </header>
+
+  <div id="cargando" class="cargando" hidden>
+    <img src="{{ url_for('static', filename='brand/loading.svg') }}" alt="">
+    <div class="cargando-txt">Cargando…</div>
+  </div>
 
   {% block body %}{% endblock %}
 

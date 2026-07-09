@@ -1,7 +1,7 @@
 {% extends "dashboard_base.html" %}
 
 {% block view %}
-<span class="view-note">Base histórica · 2025 · contratos cerrados</span>{% if datos_hasta %} <span class="view-note nota-datos">Datos hasta · {{ datos_hasta }}</span>{% endif %}
+<span class="view-note">Base histórica · 2025 · contratos cerrados</span>{% if datos_hasta %} <span class="view-note nota-datos">Actualizado · {{ datos_hasta }}</span>{% endif %}
 
 <div class="hero">
   <div class="figure">{{ f.adicional }}<small> / año</small></div>
@@ -30,7 +30,7 @@
   <div class="metric">
     <div class="k">Adicional por caso</div>
     <div class="v">{{ f.adic_caso }}</div>
-    <div class="note">comisión proyectada - real</div>
+    <div class="note">comisión proyectada − cobrada, por caso</div>
   </div>
   <div class="metric">
     <div class="k">Días de cierre</div>
@@ -79,34 +79,43 @@
   </div>
 </div>
 
-<div class="block">
-  <h3>Panorama global 2025</h3>
-  <p class="desc">Todos los contratos cerrados del año, como referencia del negocio.</p>
+<div class="block" id="panorama-global">
+  <div class="block-head">
+    <div>
+      <h3>Panorama global 2025</h3>
+      <p class="desc">Contratos cerrados del año como referencia del negocio, desglosados por canal.</p>
+    </div>
+    <div class="switch" data-switch="canal" data-target="panorama-global" role="group" aria-label="Canal">
+      <button type="button" class="on" data-canal="digital">Digital</button>
+      <button type="button" data-canal="presencial">Presencial</button>
+      <button type="button" data-canal="todos">Todos</button>
+    </div>
+  </div>
   <div class="cards">
     <div class="metric">
       <div class="k">Contratos cerrados</div>
-      <div class="v">{{ f.g_cerrados }}</div>
-      <div class="note">{{ f.g_cerrados_mes }} por mes</div>
+      <div class="v" data-v-digital="{{ g.digital.cerrados }}" data-v-presencial="{{ g.presencial.cerrados }}" data-v-todos="{{ g.todos.cerrados }}">{{ g.digital.cerrados }}</div>
+      <div class="note"><span data-v-digital="{{ g.digital.cerrados_mes }}" data-v-presencial="{{ g.presencial.cerrados_mes }}" data-v-todos="{{ g.todos.cerrados_mes }}">{{ g.digital.cerrados_mes }}</span> por mes</div>
     </div>
     <div class="metric">
       <div class="k">Comisión por caso</div>
-      <div class="v">{{ f.g_com_caso }}</div>
-      <div class="note">promedio global</div>
+      <div class="v" data-v-digital="{{ g.digital.com_caso }}" data-v-presencial="{{ g.presencial.com_caso }}" data-v-todos="{{ g.todos.com_caso }}">{{ g.digital.com_caso }}</div>
+      <div class="note">promedio del canal</div>
     </div>
     <div class="metric">
       <div class="k">Comisión total</div>
-      <div class="v">{{ f.g_com_total }}</div>
-      <div class="note">recaudación global</div>
+      <div class="v" data-v-digital="{{ g.digital.com_total }}" data-v-presencial="{{ g.presencial.com_total }}" data-v-todos="{{ g.todos.com_total }}">{{ g.digital.com_total }}</div>
+      <div class="note">recaudación del canal</div>
     </div>
     <div class="metric">
       <div class="k">Días de cierre</div>
-      <div class="v">{{ f.g_dias }}</div>
-      <div class="note">promedio global</div>
+      <div class="v" data-v-digital="{{ g.digital.dias }}" data-v-presencial="{{ g.presencial.dias }}" data-v-todos="{{ g.todos.dias }}">{{ g.digital.dias }}</div>
+      <div class="note">promedio del canal</div>
     </div>
     <div class="metric">
       <div class="k">Tasa de casos</div>
-      <div class="v">{{ f.g_tasa_casos }}</div>
-      <div class="note">del total son P2P · Digital</div>
+      <div class="v" data-v-digital="{{ g.digital.tasa }}" data-v-presencial="{{ g.presencial.tasa }}" data-v-todos="{{ g.todos.tasa }}">{{ g.digital.tasa }}</div>
+      <div class="note">cierres del canal que son casos</div>
     </div>
     <div class="metric">
       <div class="k">Comisión / monto</div>

@@ -5,23 +5,27 @@
    ====================================================================== */
 
 :root {
-  --cream:  #ECE5D6;
-  --bone:   #FAF7F0;
+  /* Paleta: blanco / blanco hueso + dos verdes (#00CB75 fuerte,
+     #B6FFB6 claro para rellenos y acentos sobre fondos oscuros) y
+     grises neutros para el texto, donde el verde claro no funciona. */
+  --cream:  #FFFFFF;         /* fondo de página */
+  --bone:   #F7F9F7;         /* paneles suaves */
   --card:   #FFFFFF;
-  --ink:    #2A2925;
-  --muted:  #76705F;
-  --faint:  #A39C8B;
-  --line:   #DDD6C6;
-  --line-2: #CFC7B4;
+  --ink:    #24292C;         /* gris casi negro para texto */
+  --muted:  #667069;         /* gris medio */
+  --faint:  #99A29B;         /* gris claro */
+  --line:   #E5E8E5;
+  --line-2: #D5DAD6;
 
-  --accent:      #1F5750;
-  --accent-ink:  #16443F;
-  --accent-soft: #E6EEEC;
-  --accent-edge: #CADEDA;
+  --accent:       #00CB75;   /* verde principal */
+  --accent-ink:   #00854E;   /* verde oscurecido: apto para texto pequeño */
+  --accent-soft:  #B6FFB6;   /* verde claro: solo rellenos y sobre oscuro */
+  --accent-tint:  #EDFDF3;   /* lavado sutil para fondos */
+  --accent-edge:  #8CEFB9;
 
-  --clay:      #9A5B4A;
-  --clay-soft: #F4E9E4;
-  --clay-edge: #E0C8BF;
+  --clay:      #B0503A;
+  --clay-soft: #FBEFEB;
+  --clay-edge: #EBCFC5;
 
   --r:    0px;
   --r-sm: 0px;
@@ -73,10 +77,10 @@ a { color: inherit; text-decoration: none; }
 }
 .site-head nav .logout {
   color: var(--accent-ink); border: 1px solid var(--accent-edge);
-  background: var(--accent-soft); padding: 5px 12px; border-radius: 3px;
+  background: var(--accent-tint); padding: 5px 12px; border-radius: 3px;
   font-size: 12.5px; transition: background 0.2s var(--ease);
 }
-.site-head nav .logout:hover { background: #d8e6e2; }
+.site-head nav .logout:hover { background: var(--accent-soft); }
 
 /* ===== Login ========================================================== */
 
@@ -107,7 +111,7 @@ a { color: inherit; text-decoration: none; }
   border: 1px solid var(--accent); border-radius: 2px; cursor: pointer;
   transition: background 0.2s var(--ease), transform 0.2s var(--ease);
 }
-.login-btn:hover { background: var(--accent-ink); }
+.login-btn:hover { background: #00A65F; }
 .login-btn:active { transform: translateY(1px); }
 .login-error {
   background: var(--clay-soft); border: 1px solid var(--clay-edge);
@@ -134,7 +138,7 @@ a { color: inherit; text-decoration: none; }
   border-radius: 2px; outline: none;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
-.search:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.search:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-tint); }
 .search::placeholder { color: var(--faint); }
 
 .chips { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -181,6 +185,8 @@ a { color: inherit; text-decoration: none; }
   line-height: 1.22; margin: 10px 0 0; color: var(--ink);
   transition: color 0.35s var(--ease);
 }
+.tile-fecha { font-size: 12.5px; font-weight: 700; color: var(--faint); }
+.tile:hover .tile-fecha { color: rgba(250, 252, 250, 0.6); }
 .tile-foot {
   margin-top: auto; padding-top: 24px; display: flex;
   align-items: center; justify-content: space-between;
@@ -196,10 +202,10 @@ a { color: inherit; text-decoration: none; }
   box-shadow: 0 22px 44px -26px rgba(42, 41, 37, 0.55);
 }
 .tile:hover .tile-body { background: var(--ink); }
-.tile:hover .tile-tag { color: var(--accent-edge); }
+.tile:hover .tile-tag { color: var(--accent-soft); }
 .tile:hover h2 { color: var(--bone); }
 .tile:hover .tile-foot { color: rgba(250, 247, 240, 0.72); }
-.tile:hover .arrow { transform: translateX(6px); color: var(--accent-edge); }
+.tile:hover .arrow { transform: translateX(6px); color: var(--accent-soft); }
 
 /* ===== Dashboard ====================================================== */
 
@@ -283,7 +289,7 @@ a { color: inherit; text-decoration: none; }
 .vs-arrow { color: var(--faint); font-size: 20px; }
 .vs-badge {
   margin-left: auto; padding: 8px 15px; border-radius: 3px;
-  background: var(--accent-soft); color: var(--accent-ink);
+  background: var(--accent-tint); color: var(--accent-ink);
   font-weight: 900; font-size: 15px; letter-spacing: -0.01em;
   border: 1px solid var(--accent-edge);
 }
@@ -308,7 +314,7 @@ a { color: inherit; text-decoration: none; }
   border-radius: 3px; font-size: 13px; font-weight: 900;
   background: var(--cream); border: 1px solid var(--line);
 }
-.delta.up   { color: var(--accent-ink); border-color: var(--accent-edge); background: var(--accent-soft); }
+.delta.up   { color: var(--accent-ink); border-color: var(--accent-edge); background: var(--accent-tint); }
 .delta.down { color: var(--clay);      border-color: var(--clay-edge);    background: var(--clay-soft); }
 .delta.flat { color: var(--muted); }
 
@@ -424,7 +430,7 @@ a { color: inherit; text-decoration: none; }
 /* fecha de corte de los datos */
 .view-note + .view-note { margin-left: 8px; }
 .nota-datos {
-  color: var(--accent-ink); background: var(--accent-soft);
+  color: var(--accent-ink); background: var(--accent-tint);
   border-color: var(--accent-edge);
 }
 
@@ -450,7 +456,7 @@ a { color: inherit; text-decoration: none; }
   text-align: center;
 }
 .login-aviso {
-  background: var(--accent-soft); border: 1px solid var(--accent-edge);
+  background: var(--accent-tint); border: 1px solid var(--accent-edge);
   color: var(--accent-ink); font-weight: 700; font-size: 13px;
   padding: 10px 14px; border-radius: 2px; margin-bottom: 18px;
 }
@@ -472,3 +478,71 @@ a { color: inherit; text-decoration: none; }
   font-size: 12.5px; font-weight: 700; color: var(--faint);
   letter-spacing: 0;
 }
+
+
+/* ===== Logo ============================================================ */
+
+.brand-logo { width: 22px; height: 22px; display: block; flex: none; }
+.brand-logo-lg { width: 30px; height: 30px; }
+
+/* ===== Pantalla de carga ============================================== */
+
+.cargando {
+  position: fixed; inset: 0; z-index: 100;
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 18px;
+  background: rgba(255, 255, 255, 0.94);
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+.cargando[hidden] { display: none; }
+.cargando.on { opacity: 1; pointer-events: auto; }
+.cargando img {
+  width: 84px; height: 84px;
+  animation: latido 1.6s var(--ease) infinite;
+}
+.cargando-txt {
+  font-size: 13px; font-weight: 700; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--muted);
+  animation: parpadeo 1.6s ease infinite;
+}
+@keyframes latido {
+  0%, 100% { transform: scale(1) translateY(0); }
+  50%      { transform: scale(1.08) translateY(-6px); }
+}
+@keyframes parpadeo { 0%,100% { opacity: 0.55; } 50% { opacity: 1; } }
+
+/* ===== Conmutadores (canal / referencia de comparación) =============== */
+
+.switch {
+  display: inline-flex; border: 1px solid var(--line); background: var(--card);
+}
+.switch button {
+  padding: 7px 14px; font: 700 12.5px "Lato", sans-serif;
+  color: var(--muted); background: none; border: none; cursor: pointer;
+  border-right: 1px solid var(--line);
+  transition: background 0.2s var(--ease), color 0.2s var(--ease);
+}
+.switch button:last-child { border-right: none; }
+.switch button:hover { color: var(--ink); }
+.switch button.on { background: var(--ink); color: #fff; }
+
+.block-head {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px; flex-wrap: wrap;
+}
+
+/* selector de referencia por fila de comparación */
+.cmp-opciones { display: inline-flex; gap: 4px; margin-top: 6px; }
+.cmp-opciones button {
+  padding: 3px 9px; font: 700 11px "Lato", sans-serif;
+  color: var(--muted); background: var(--bone);
+  border: 1px solid var(--line); cursor: pointer;
+  transition: all 0.2s var(--ease);
+}
+.cmp-opciones button:hover { color: var(--ink); border-color: var(--line-2); }
+.cmp-opciones button.on {
+  background: var(--accent-tint); color: var(--accent-ink);
+  border-color: var(--accent-edge);
+}
+.cmp-formula { display: block; font-size: 12px; font-weight: 400; color: var(--faint); margin-top: 2px; }

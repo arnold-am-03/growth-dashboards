@@ -32,7 +32,7 @@
         {% if p.tags %}<span class="tile-tag">{{ p.tags | join(' · ') }}</span>{% endif %}
         <h2>{{ p.title }}</h2>
         <div class="tile-foot">
-          <span class="views-txt">{% for v in p.views %}{{ v.label }}{% if not loop.last %} · {% endif %}{% endfor %}</span>
+          <span class="tile-fecha">{% if fechas.get(p.slug) %}Actualizado · {{ fechas[p.slug] }}{% endif %}</span>
           <span class="arrow">&rarr;</span>
         </div>
       </div>

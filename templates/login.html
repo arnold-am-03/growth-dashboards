@@ -11,10 +11,14 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
 </head>
 <body class="login-body">
+  <div id="cargando" class="cargando" hidden>
+    <img src="{{ url_for('static', filename='brand/loading.svg') }}" alt="">
+    <div class="cargando-txt">Cargando…</div>
+  </div>
   <main class="login-wrap">
     <div class="login-card">
       <div class="login-brand">
-        <span class="brand-mark"></span>
+        <img class="brand-logo brand-logo-lg" src="{{ url_for('static', filename='brand/logo.svg') }}" alt="">
         <div>
           <div class="brand-name">Growth Innovation</div>
           <div class="brand-tag" style="border:0;padding:0">Experimentos de la Bitacorita</div>
@@ -68,5 +72,6 @@
       <p class="login-foot">Panel interno · Growth &amp; Performance</p>
     </div>
   </main>
+  <script defer src="{{ url_for('static', filename='js/loading.js') }}"></script>
 </body>
 </html>

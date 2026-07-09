@@ -143,3 +143,29 @@ Variables de entorno (Render → Environment):
 
 Sin SMTP configurado (desarrollo local), el PIN se imprime en los logs del
 servidor para poder probar el flujo.
+
+
+## Personalización de marca
+
+- **Logo**: reemplaza `static/brand/logo.svg` por el tuyo (mismo nombre de
+  archivo). Aparece en la cabecera y en la pantalla de acceso.
+- **Imagen de carga**: reemplaza `static/brand/loading.svg`. La animación en
+  loop (latido + flotación) la aplica el CSS, así que cualquier imagen que
+  pongas quedará animada automáticamente.
+- **Paleta**: definida en `static/css/main.css` (`:root`): blanco / blanco
+  hueso, verde principal `#00CB75`, verde claro `#B6FFB6` (solo rellenos y
+  acentos sobre fondos oscuros) y grises neutros para el texto.
+
+## Pantalla de "waking up" de Render
+
+La página de espera que muestra Render al despertar un servicio del plan free
+pertenece al proxy de Render y no se puede rediseñar (aparece antes de que la
+app arranque). Dos mitigaciones incluidas:
+
+1. **Keep-alive**: el endpoint público `/salud` responde sin autenticación.
+   Configura un monitor gratuito (p. ej. UptimeRobot o cron-job.org) que
+   visite `https://<tu-app>.onrender.com/salud` cada 10 minutos y el servicio
+   no volverá a dormirse (el plan free incluye 750 h/mes: alcanza para 24/7).
+2. **Pantalla de carga propia**: dentro de la app, cualquier navegación que
+   tarde más de ~350 ms muestra una capa con tu imagen de
+   `static/brand/loading.svg` animada en loop.
